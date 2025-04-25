@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For Sadikshya 💖</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #ffe0e9, #fff);
+      color: #333;
+    }
+    header {
+      text-align: center;
+      padding: 2rem;
+      background: #ffccd5;
+      color: #800020;
+    }
+    header h1 {
+      font-size: 3rem;
+      margin: 0;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      padding: 2rem;
+    }
+    .gallery img {
+      width: 100%;
+      border-radius: 15px;
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .gallery img:hover {
+      transform: scale(1.05);
+    }
+    .message-section {
+      padding: 2rem;
+      background-color: #fff0f5;
+    }
+    .message-section h2 {
+      text-align: center;
+      color: #d6336c;
+    }
+    .message-section p {
+      max-width: 800px;
+      margin: 1rem auto;
+      font-size: 1.2rem;
+      line-height: 1.8;
+      text-align: center;
+    }
+    footer {
+      background: #ffccd5;
+      text-align: center;
+      padding: 1rem;
+      color: #800020;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>For the Girl Who Owns My Heart 💖</h1>
+    <p>Sadikshya, this is all for you.</p>
+  </header>
+
+  <section class="gallery">
+    <!-- Uploaded photo -->
+    <img src="ME AND SHE.png" alt="Me and Sadikshya together" />
+
+    <!-- Other image links -->
+    <img src="her-photo1.jpg" alt="Sadikshya smiling" />
+    <img src="her-photo3.jpg" alt="Queen Sadikshya" />
+    <img src="her-photo4.jpg" alt="Her beautiful eyes" />
+    <img src="her-photo5.jpg" alt="Sunshine smile" />
+    <img src="her-photo6.jpg" alt="Elegance in every pose" />
+    <img src="her-photo7.jpg" alt="Pure charm" />
+    <img src="her-photo8.jpg" alt="Magic in a glance" />
+    <img src="her-photo9.jpg" alt="Heart stealer" />
+    <img src="her-photo10.jpg" alt="Just wow!" />
+  </section>
+
+  <section class="message-section">
+    <h2>A Message from Me to You 💌</h2>
+    <p>
+      Dear Sadikshya,<br />
+      Every moment I see you, my heart skips a beat. You’ve become the sunshine in my cloudy days,
+      the music in my silence, and the smile in my sadness. This little website is just a way to say
+      how special you are to me. You inspire me every single day, and I just want you to know… you’ll
+      always have a special place in my heart. 🥺❤️<br />
+      Yours truly,<br />
+      Pushpraj 💘
+    </p>
+  </section>
+
+  <footer>
+    <p>Made with ❤️ by Pushpraj just for Sadikshya</p>
+  </footer>
+</body>
+</html>
