@@ -1,319 +1,323 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Not Found | MyWebsite</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SEE GPA Calculator — Playful Edition</title>
+  <style>
+    /* Simple, modern styling */
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#7c5cff; --muted:#9aa4b2; --glass: rgba(255,255,255,0.04);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background:
+        radial-gradient(600px 400px at 10% 10%, rgba(124,92,255,0.12), transparent 10%),
+        linear-gradient(180deg,#071027 0%, #071827 100%);
+      color:#e6eef8; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:32px;
+    }
+    .card{
+      width:100%; max-width:920px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px; padding:20px; box-shadow: 0 8px 24px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.03);
+      display:grid; grid-template-columns: 1fr 380px; gap:18px; align-items:start;
+    }
+    header{
+      grid-column: 1 / -1; display:flex; align-items:center; gap:12px;
+    }
+    .logo{
+      width:56px; height:56px; border-radius:10px; background:linear-gradient(135deg,var(--accent), #42bff5);
+      display:flex; align-items:center; justify-content:center; font-weight:700; font-size:20px; color:white;
+      box-shadow: 0 6px 20px rgba(124,92,255,0.12);
+    }
+    h1{ font-size:20px; margin:0; letter-spacing:0.2px }
+    p.lead{ margin:0; color:var(--muted); font-size:13px }
+    .left, .right{ background:var(--card); padding:14px; border-radius:10px; border:1px solid var(--glass) }
+    .controls{ display:flex; gap:8px; align-items:center; margin:12px 0 18px 0 }
+    .btn {
+      background:transparent; border:1px solid rgba(255,255,255,0.04); padding:8px 10px; border-radius:8px; cursor:pointer;
+      color:var(--muted); font-size:13px;
+    }
+    .btn.active{ border-color: rgba(124,92,255,0.9); background: linear-gradient(90deg, rgba(124,92,255,0.12), transparent); color:#eaf0ff; }
+    label{ display:block; font-size:13px; color:var(--muted); margin-bottom:6px }
+    .subjects{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .subject{
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));
+      padding:10px; border-radius:8px; border:1px dashed rgba(255,255,255,0.02);
+    }
+    input[type=number], select{
+      width:100%; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);
+      background:transparent; color:inherit; outline:none; font-size:14px;
+    }
+    .result{
+      display:flex; flex-direction:column; gap:12px; align-items:center; justify-content:center; text-align:center;
+    }
+    .big{
+      font-size:36px; font-weight:700; letter-spacing:1px;
+    }
+    .muted{ color:var(--muted); font-size:13px }
+    .grade-row{ display:flex; justify-content:space-between; gap:10px; align-items:center;}
+    small { color:var(--muted); display:block; margin-top:6px }
+    footer{ grid-column: 1 / -1; text-align:center; color:var(--muted); margin-top:12px; font-size:13px }
+    .funfact { background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:8px 10px; border-radius:8px; font-size:13px; color:#fff;}
+    .note{ font-size:12px; color:var(--muted) }
+    .small-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
+    .reset{ background:transparent; color:#ff9b9b; border:1px dashed rgba(255,155,155,0.06) }
+    @media (max-width:900px){
+      .card{ grid-template-columns: 1fr; }
+      header{ flex-direction:column; align-items:flex-start; gap:6px }
+    }
+  </style>
 </head>
 <body>
-    <!-- Header (same as home page) -->
+  <div class="card" role="application" aria-label="SEE GPA Calculator">
     <header>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <img src="images/logo.png" alt="MyWebsite Logo">
-            </a>
-            <nav class="navbar">
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="services.html">Services</a></li>
-                    <li><a href="portfolio.html">Portfolio</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-            </nav>
-            <div class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
+      <div class="logo">SEE</div>
+      <div>
+        <h1>SEE GPA Calculator — Playful Edition 🧮✨</h1>
+        <p class="lead">Enter marks or pick grades for 7 subjects. This tool calculates grade points + final GPA (out of 4.0).</p>
+      </div>
     </header>
 
-    <!-- 404 Section -->
-    <section class="error-404">
-        <div class="container">
-            <div class="error-content">
-                <h1>404</h1>
-                <h2>Oops! Page Not Found</h2>
-                <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
-                <div class="error-buttons">
-                    <a href="index.html" class="btn btn-primary">Go to Homepage</a>
-                    <a href="contact.html" class="btn btn-secondary">Contact Support</a>
-                </div>
-            </div>
+    <section class="left" aria-live="polite">
+      <div class="controls" role="tablist" aria-label="Input mode">
+        <button id="modeMarks" class="btn active" role="tab" aria-selected="true">Enter Marks</button>
+        <button id="modeGrades" class="btn" role="tab" aria-selected="false">Choose Grades</button>
+        <div style="margin-left:auto" class="funfact" title="Daily fun fact">Fun fact: Honey never spoils. 🍯</div>
+      </div>
+
+      <div id="marksPanel">
+        <div class="subjects" id="subjectsMarks">
+          <!-- 7 subjects will be injected by JS -->
         </div>
+        <small class="muted">Tip: If you don't have a subject, leave it blank and it'll be ignored.</small>
+      </div>
+
+      <div id="gradesPanel" style="display:none">
+        <div class="subjects" id="subjectsGrades">
+          <!-- 7 subjects grade selects -->
+        </div>
+        <small class="muted">Choose grades directly (A+, A, B+, ...).</small>
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:8px;">
+        <button id="calc" class="btn">Calculate GPA</button>
+        <button id="reset" class="btn reset">Reset</button>
+        <div style="margin-left:auto" class="note">Scale: A+ = 4.0, A = 4.0, A- = 3.7, B+ = 3.3, B = 3.0, C = 2.0, D = 1.0, E/F = 0</div>
+      </div>
     </section>
 
-    <!-- Footer (same as home page) -->
+    <aside class="right">
+      <div class="result" aria-live="polite">
+        <div class="muted">Final GPA</div>
+        <div id="gpaValue" class="big">—</div>
+        <div id="percentage" class="muted">—</div>
+
+        <div style="width:100%; margin-top:6px;">
+          <div class="grade-row"><div class="muted">Subjects counted</div><div id="count" class="muted">0 / 7</div></div>
+          <div style="height:8px; background:rgba(255,255,255,0.03); border-radius:8px; margin-top:8px; overflow:hidden">
+            <div id="progress" style="height:100%; width:0%; background:linear-gradient(90deg,var(--accent), #42bff5); transition:width .4s"></div>
+          </div>
+        </div>
+
+        <div style="width:100%; margin-top:12px; text-align:left;">
+          <strong style="display:block; margin-bottom:8px">Subject breakdown</strong>
+          <div id="breakdown" style="display:grid; gap:8px"></div>
+        </div>
+      </div>
+    </aside>
+
     <footer>
-        <!-- Footer content from home page -->
+      Made with 🤍 for hardworking students. Want it tweaked? Ask and I'll make it sillier or more serious.
     </footer>
+  </div>
 
-    <script src="js/script.js"></script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Not Found | MyWebsite</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <!-- Header (same as home page) -->
-    <header>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <img src="images/logo.png" alt="MyWebsite Logo">
-            </a>
-            <nav class="navbar">
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="services.html">Services</a></li>
-                    <li><a href="portfolio.html">Portfolio</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-            </nav>
-            <div class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
-    </header>
+  <script>
+    // Subjects default names (you can change)
+    const SUBJECTS = [
+      "Compulsory English",
+      "Compulsory Nepali",
+      "Compulsory Mathematics",
+      "Compulsory Social Studies",
+      "Compulsory Science",
+      "Optional I",
+      "Optional II"
+    ];
 
-    <!-- 404 Section -->
-    <section class="error-404">
-        <div class="container">
-            <div class="error-content">
-                <h1>404</h1>
-                <h2>Oops! Page Not Found</h2>
-                <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
-                <div class="error-buttons">
-                    <a href="index.html" class="btn btn-primary">Go to Homepage</a>
-                    <a href="contact.html" class="btn btn-secondary">Contact Support</a>
-                </div>
-            </div>
-        </div>
-    </section>
+    // Grade to grade point mapping (Nepal SEE-like simplified scale)
+    const gradePoints = {
+      "A+": 4.0, "A": 4.0, "A-": 3.7,
+      "B+": 3.3, "B": 3.0, "C": 2.0,
+      "D": 1.0, "E": 0.0, "F": 0.0
+    };
 
-    <!-- Footer (same as home page) -->
-    <footer>
-        <!-- Footer content from home page -->
-    </footer>
+    // Marks to grade mapping (simple thresholds - tweak as you like)
+    function marksToGrade(m){
+      if (m === null || m === "" || isNaN(m)) return null;
+      m = Number(m);
+      if (m >= 90) return "A+";
+      if (m >= 80) return "A";
+      if (m >= 75) return "A-";
+      if (m >= 70) return "B+";
+      if (m >= 60) return "B";
+      if (m >= 50) return "C";
+      if (m >= 40) return "D";
+      return "E";
+    }
 
-    <script src="js/script.js"></script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Not Found | MyWebsite</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <!-- Header (same as home page) -->
-    <header>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <img src="images/logo.png" alt="MyWebsite Logo">
-            </a>
-            <nav class="navbar">
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="services.html">Services</a></li>
-                    <li><a href="portfolio.html">Portfolio</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-            </nav>
-            <div class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
-    </header>
+    // Build UI inputs
+    const sm = document.getElementById('subjectsMarks');
+    const sg = document.getElementById('subjectsGrades');
+    SUBJECTS.forEach((s,i) => {
+      // Marks input card
+      const divM = document.createElement('div'); divM.className='subject';
+      divM.innerHTML = \`
+        <label>\${s}</label>
+        <input type="number" min="0" max="100" placeholder="Marks (0-100)" data-idx="\${i}" class="marks-input" />
+      \`;
+      sm.appendChild(divM);
 
-    <!-- 404 Section -->
-    <section class="error-404">
-        <div class="container">
-            <div class="error-content">
-                <h1>404</h1>
-                <h2>Oops! Page Not Found</h2>
-                <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
-                <div class="error-buttons">
-                    <a href="index.html" class="btn btn-primary">Go to Homepage</a>
-                    <a href="contact.html" class="btn btn-secondary">Contact Support</a>
-                </div>
-            </div>
-        </div>
-    </section>
+      // Grade select card
+      const divG = document.createElement('div'); divG.className='subject';
+      divG.innerHTML = \`
+        <label>\${s}</label>
+        <select data-idx="\${i}" class="grade-select">
+          <option value="">-- choose grade --</option>
+          <option>A+</option><option>A</option><option>A-</option>
+          <option>B+</option><option>B</option><option>C</option>
+          <option>D</option><option>E</option><option>F</option>
+        </select>
+      \`;
+      sg.appendChild(divG);
+    });
 
-    <!-- Footer (same as home page) -->
-    <footer>
-        <!-- Footer content from home page -->
-    </footer>
+    // Mode switching
+    const modeMarks = document.getElementById('modeMarks');
+    const modeGrades = document.getElementById('modeGrades');
+    const marksPanel = document.getElementById('marksPanel');
+    const gradesPanel = document.getElementById('gradesPanel');
 
-    <script src="js/script.js"></script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Not Found | MyWebsite</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <!-- Header (same as home page) -->
-    <header>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <img src="images/logo.png" alt="MyWebsite Logo">
-            </a>
-            <nav class="navbar">
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="services.html">Services</a></li>
-                    <li><a href="portfolio.html">Portfolio</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-            </nav>
-            <div class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
-    </header>
+    modeMarks.addEventListener('click', ()=> {
+      modeMarks.classList.add('active'); modeMarks.setAttribute('aria-selected','true');
+      modeGrades.classList.remove('active'); modeGrades.setAttribute('aria-selected','false');
+      marksPanel.style.display='block'; gradesPanel.style.display='none';
+    });
+    modeGrades.addEventListener('click', ()=> {
+      modeGrades.classList.add('active'); modeGrades.setAttribute('aria-selected','true');
+      modeMarks.classList.remove('active'); modeMarks.setAttribute('aria-selected','false');
+      marksPanel.style.display='none'; gradesPanel.style.display='block';
+    });
 
-    <!-- 404 Section -->
-    <section class="error-404">
-        <div class="container">
-            <div class="error-content">
-                <h1>404</h1>
-                <h2>Oops! Page Not Found</h2>
-                <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
-                <div class="error-buttons">
-                    <a href="index.html" class="btn btn-primary">Go to Homepage</a>
-                    <a href="contact.html" class="btn btn-secondary">Contact Support</a>
-                </div>
-            </div>
-        </div>
-    </section>
+    // Calculation logic
+    function calculate(){
+      const marksInputs = Array.from(document.querySelectorAll('.marks-input'));
+      const gradeSelects = Array.from(document.querySelectorAll('.grade-select'));
 
-    <!-- Footer (same as home page) -->
-    <footer>
-        <!-- Footer content from home page -->
-    </footer>
+      const useMarks = modeMarks.classList.contains('active');
+      let totalGP = 0, count = 0;
+      const breakdown = [];
 
-    <script src="js/script.js"></script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Not Found | MyWebsite</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <!-- Header (same as home page) -->
-    <header>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <img src="images/logo.png" alt="MyWebsite Logo">
-            </a>
-            <nav class="navbar">
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="services.html">Services</a></li>
-                    <li><a href="portfolio.html">Portfolio</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-            </nav>
-            <div class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
-    </header>
+      for(let i=0;i<SUBJECTS.length;i++){
+        let gp = null, grade = null, marksVal = null;
+        if(useMarks){
+          marksVal = marksInputs[i].value.trim();
+          if(marksVal === "") { /* skip */ }
+          else {
+            grade = marksToGrade(Number(marksVal));
+            gp = grade ? gradePoints[grade] : null;
+          }
+        } else {
+          grade = gradeSelects[i].value || null;
+          if(grade) gp = gradePoints[grade] ?? 0;
+        }
 
-    <!-- 404 Section -->
-    <section class="error-404">
-        <div class="container">
-            <div class="error-content">
-                <h1>404</h1>
-                <h2>Oops! Page Not Found</h2>
-                <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
-                <div class="error-buttons">
-                    <a href="index.html" class="btn btn-primary">Go to Homepage</a>
-                    <a href="contact.html" class="btn btn-secondary">Contact Support</a>
-                </div>
-            </div>
-        </div>
-    </section>
+        if(gp !== null && !isNaN(gp)){
+          totalGP += gp; count++;
+          breakdown.push({subject: SUBJECTS[i], grade: grade || marksVal, gp: gp, marks: marksVal});
+        } else {
+          breakdown.push({subject: SUBJECTS[i], grade: grade || (marksVal || "—"), gp: "—", marks: marksVal});
+        }
+      }
 
-    <!-- Footer (same as home page) -->
-    <footer>
-        <!-- Footer content from home page -->
-    </footer>
+      // Compute GPA: average of grade points (simple average)
+      const gpa = count > 0 ? (totalGP / count) : 0;
+      updateUI(gpa, breakdown, count);
+    }
 
-    <script src="js/script.js"></script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Not Found | MyWebsite</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <!-- Header (same as home page) -->
-    <header>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <img src="images/logo.png" alt="MyWebsite Logo">
-            </a>
-            <nav class="navbar">
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="services.html">Services</a></li>
-                    <li><a href="portfolio.html">Portfolio</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-            </nav>
-            <div class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
-    </header>
+    function updateUI(gpa, breakdown, count){
+      const gpaValue = document.getElementById('gpaValue');
+      const percent = document.getElementById('percentage');
+      const cnt = document.getElementById('count');
+      const prog = document.getElementById('progress');
+      const bd = document.getElementById('breakdown');
 
-    <!-- 404 Section -->
-    <section class="error-404">
-        <div class="container">
-            <div class="error-content">
-                <h1>404</h1>
-                <h2>Oops! Page Not Found</h2>
-                <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
-                <div class="error-buttons">
-                    <a href="index.html" class="btn btn-primary">Go to Homepage</a>
-                    <a href="contact.html" class="btn btn-secondary">Contact Support</a>
-                </div>
-            </div>
-        </div>
-    </section>
+      if(count === 0){
+        gpaValue.textContent = '—';
+        percent.textContent = 'Provide marks or grades for at least 1 subject';
+        cnt.textContent = '0 / 7';
+        prog.style.width = '0%';
+        bd.innerHTML = '';
+        return;
+      }
 
-    <!-- Footer (same as home page) -->
-    <footer>
-        <!-- Footer content from home page -->
-    </footer>
+      // Round to 2 decimals
+      const gpaRounded = Math.round(gpa * 100) / 100;
+      gpaValue.textContent = gpaRounded.toFixed(2) + ' / 4.00';
 
-    <script src="js/script.js"></script>
+      // Approx percentage mapping: (gpa / 4) * 100 (simple)
+      const perc = Math.round((gpaRounded / 4) * 10000) / 100;
+      percent.textContent = perc + '% (approx)';
+
+      cnt.textContent = \`\${count} / 7\`;
+      prog.style.width = Math.min(100, (count/7)*100) + '%';
+
+      // Subject breakdown
+      bd.innerHTML = '';
+      breakdown.forEach(b => {
+        const row = document.createElement('div');
+        row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center';
+        row.style.padding='6px 8px'; row.style.borderRadius='6px'; row.style.background='rgba(255,255,255,0.01)';
+        row.innerHTML = \`
+          <div style="font-size:13px"><strong>\${b.subject}</strong><div style="font-size:12px;color:var(--muted)">marks: \${b.marks || '—'}</div></div>
+          <div style="text-align:right">
+            <div style="font-weight:600">\${b.grade || '—'}</div>
+            <div style="font-size:13px;color:var(--muted)">gp: \${b.gp}</div>
+          </div>
+        \`;
+        bd.appendChild(row);
+      });
+    }
+
+    // Button events
+    document.getElementById('calc').addEventListener('click', calculate);
+    document.getElementById('reset').addEventListener('click', ()=>{
+      document.querySelectorAll('input[type=number]').forEach(inp => inp.value = '');
+      document.querySelectorAll('select').forEach(sel => sel.value = '');
+      document.getElementById('gpaValue').textContent = '—';
+      document.getElementById('percentage').textContent = '—';
+      document.getElementById('count').textContent = '0 / 7';
+      document.getElementById('progress').style.width = '0%';
+      document.getElementById('breakdown').innerHTML = '';
+    });
+
+    // Friendly UX: calculate while typing (debounced)
+    let typingTimer;
+    document.addEventListener('input', (e)=>{
+      if(e.target.matches('.marks-input') || e.target.matches('.grade-select')){
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(calculate, 500);
+      }
+    });
+
+    // Initial population (blank)
+    updateUI(0, [], 0);
+
+    // Accessibility: keyboard shortcuts (M - marks, G - grades, C - calculate)
+    document.addEventListener('keydown', (e)=>{
+      if(e.key.toLowerCase() === 'm'){ modeMarks.click(); }
+      if(e.key.toLowerCase() === 'g'){ modeGrades.click(); }
+      if(e.key.toLowerCase() === 'c'){ document.getElementById('calc').click(); }
+    });
+  </script>
 </body>
 </html>
