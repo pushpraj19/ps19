@@ -1,13 +1,457 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My website</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ProductivePulse — Task & Focus Manager</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa6b2; --accent:#7c5cff; --success:#4ade80; --danger:#ff6b6b; --glass: rgba(255,255,255,0.03);
+      --radius:14px; --glass-2: rgba(255,255,255,0.02);
+      font-synthesis: none;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,system-ui,-apple-system,Segoe UI Emoji,Helvetica,Arial;background:linear-gradient(180deg,#071028 0%, #071525 60%);color:#e6eef7}
+    .app{max-width:1100px;margin:28px auto;padding:22px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 8px 30px rgba(2,6,23,0.6);backdrop-filter: blur(6px)}
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between}
+    h1{margin:0;font-size:20px;letter-spacing:0.4px}
+    .top-actions{display:flex;gap:10px;align-items:center}
+    button{background:var(--glass);border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:10px;color:inherit;cursor:pointer}
+    button.ghost{background:transparent}
+    .controls{display:flex;gap:12px;align-items:center}
+
+    .layout{display:grid;grid-template-columns:360px 1fr;gap:18px;margin-top:18px}
+    .panel{background:linear-gradient(180deg,var(--card), #051025);padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,0.03)}
+
+    /* Left column */
+    .create{display:flex;flex-direction:column;gap:10px}
+    label{font-size:12px;color:var(--muted)}
+    input[type=text], textarea, select, input[type=date], input[type=time]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
+    .row{display:flex;gap:8px}
+    .tag{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;background:var(--glass-2);border:1px solid rgba(255,255,255,0.02)}
+
+    /* Tasks list */
+    .task-list{display:flex;flex-direction:column;gap:10px;min-height:160px}
+    .task{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+    .task.dragging{opacity:0.6}
+    .check{width:20px;height:20px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .title{font-weight:600}
+    .meta{font-size:12px;color:var(--muted)}
+    .right{margin-left:auto;display:flex;gap:8px}
+    .priority-high{color:var(--danger);font-weight:700}
+    .priority-med{color:#ffb86b;font-weight:700}
+    .priority-low{color:var(--muted)}
+
+    /* Search / filters */
+    .filters{display:flex;gap:8px;flex-wrap:wrap}
+    .pill{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);background:var(--glass);font-size:13px}
+
+    /* Stats */
+    .stats{display:flex;gap:10px;flex-wrap:wrap}
+    .stat{flex:1;min-width:120px;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02)}
+
+    /* Pomodoro */
+    .pomodoro{display:flex;flex-direction:column;gap:8px;align-items:center}
+    .timer{font-size:34px;font-weight:800}
+    .pom-buttons{display:flex;gap:8px}
+
+    /* responsive */
+    @media (max-width:900px){.layout{grid-template-columns:1fr;}.app{margin:12px}}
+
+    /* subtle focus */
+    input:focus,button:focus,textarea:focus{outline:2px solid rgba(124,92,255,0.16)}
+
+    /* importer/exporter */
+    .small{font-size:13px}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+  </style>
 </head>
-
 <body>
-</body>
+  <div class="app" role="application" aria-label="ProductivePulse task manager">
+    <header>
+      <div>
+        <h1>ProductivePulse ⚡ — Boost your focus</h1>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px">Quick, lightweight task manager with Pomodoro & export — saves to your browser.</div>
+      </div>
+      <div class="top-actions">
+        <div class="controls">
+          <button id="newTaskBtn">+ New task</button>
+          <button id="exportBtn" title="Export JSON">Export</button>
+          <button id="importBtn" title="Import JSON">Import</button>
+          <button id="clearBtn" class="ghost" title="Clear all">Clear</button>
+        </div>
+      </div>
+    </header>
 
+    <main class="layout">
+      <aside class="panel">
+        <div class="create">
+          <label for="title">Task title</label>
+          <input id="title" placeholder="e.g. Finish math project" />
+
+          <div class="row">
+            <div style="flex:1">
+              <label for="dueDate">Due date</label>
+              <input id="dueDate" type="date" />
+            </div>
+            <div style="width:120px">
+              <label for="dueTime">Due time</label>
+              <input id="dueTime" type="time" />
+            </div>
+          </div>
+
+          <label for="notes">Notes</label>
+          <textarea id="notes" rows="3" placeholder="Add steps or resources..."></textarea>
+
+          <div class="row">
+            <div style="flex:1">
+              <label for="priority">Priority</label>
+              <select id="priority">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div style="width:120px">
+              <label for="tag">Tag</label>
+              <input id="tag" placeholder="e.g. Study" />
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center">
+            <button id="addBtn">Add Task</button>
+            <button id="updateBtn" style="display:none">Update</button>
+            <div style="margin-left:auto;color:var(--muted);font-size:13px">Shortcuts: N = new, / = search, D = toggle theme</div>
+          </div>
+        </div>
+
+        <hr style="opacity:0.06;margin:12px 0" />
+
+        <div>
+          <label>Filters</label>
+          <div class="filters">
+            <button class="pill" data-filter="all">All</button>
+            <button class="pill" data-filter="active">Active</button>
+            <button class="pill" data-filter="completed">Completed</button>
+            <button class="pill" data-filter="today">Due Today</button>
+            <button class="pill" data-filter="overdue">Overdue</button>
+          </div>
+        </div>
+
+        <hr style="opacity:0.06;margin:12px 0" />
+
+        <div>
+          <label>Pomodoro Focus</label>
+          <div class="pomodoro">
+            <div class="timer" id="timer">25:00</div>
+            <div class="small meta">Sessions done: <span id="sessionsDone">0</span></div>
+            <div class="pom-buttons">
+              <button id="startPom">Start</button>
+              <button id="stopPom">Stop</button>
+              <button id="skipPom">Skip</button>
+            </div>
+          </div>
+        </div>
+
+        <hr style="opacity:0.06;margin:12px 0" />
+
+        <div>
+          <label>Data</label>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="exportJson">Download JSON</button>
+            <button id="importJson">Paste JSON</button>
+          </div>
+          <textarea id="jsonArea" style="width:100%;height:90px;margin-top:8px;display:none" placeholder="Paste exported JSON here"></textarea>
+          <div style="margin-top:8px;font-size:13px;color:var(--muted)">You can backup, share, or restore your tasks using JSON.</div>
+        </div>
+      </aside>
+
+      <section class="panel">
+        <div style="display:flex;gap:12px;align-items:center">
+          <input id="search" placeholder="Search tasks, tags, notes... (press /)" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent" />
+          <div class="stats" style="display:flex;gap:10px">
+            <div class="stat"><div style="font-size:12px;color:var(--muted)">Total</div><div id="statTotal">0</div></div>
+            <div class="stat"><div style="font-size:12px;color:var(--muted)">Completed</div><div id="statDone">0</div></div>
+            <div class="stat"><div style="font-size:12px;color:var(--muted)">Overdue</div><div id="statOver">0</div></div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" id="listContainer">
+          <div class="task-list" id="taskList" aria-live="polite"></div>
+        </div>
+
+        <hr style="opacity:0.06;margin:12px 0" />
+
+        <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
+          <div style="color:var(--muted);font-size:13px">Drag & drop tasks to reorder. Click the checkbox to complete.</div>
+          <div>
+            <button id="clearCompleted">Clear Completed</button>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+    <footer>ProductivePulse — local-only, private, and fast. Have fun staying focused! 🚀</footer>
+  </div>
+
+  <script>
+    /* ProductivePulse v1 - single-file app
+       - tasks stored in localStorage under key 'productive_pulse_v1'
+       - features: add/edit/delete, drag & drop, search, filters, priority, tags, due date, pomodoro timer, export/import
+    */
+
+    const STORAGE_KEY = 'productive_pulse_v1';
+    let tasks = [];
+    let editId = null;
+
+    // DOM
+    const titleEl = document.getElementById('title');
+    const notesEl = document.getElementById('notes');
+    const dueDateEl = document.getElementById('dueDate');
+    const dueTimeEl = document.getElementById('dueTime');
+    const priorityEl = document.getElementById('priority');
+    const tagEl = document.getElementById('tag');
+    const addBtn = document.getElementById('addBtn');
+    const updateBtn = document.getElementById('updateBtn');
+    const taskList = document.getElementById('taskList');
+    const search = document.getElementById('search');
+    const statTotal = document.getElementById('statTotal');
+    const statDone = document.getElementById('statDone');
+    const statOver = document.getElementById('statOver');
+    const newTaskBtn = document.getElementById('newTaskBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const clearCompleted = document.getElementById('clearCompleted');
+    const exportJson = document.getElementById('exportJson');
+    const importJson = document.getElementById('importJson');
+    const jsonArea = document.getElementById('jsonArea');
+
+    // Pomodoro
+    const timerEl = document.getElementById('timer');
+    const startPom = document.getElementById('startPom');
+    const stopPom = document.getElementById('stopPom');
+    const skipPom = document.getElementById('skipPom');
+    const sessionsDoneEl = document.getElementById('sessionsDone');
+
+    let pom = {work:25*60, break:5*60, running:false, mode:'work', remaining:25*60, interval:null, sessions:0};
+
+    function save(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({tasks, pom}));
+    }
+    function load(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        try{const parsed = JSON.parse(raw); tasks = parsed.tasks || []; pom = parsed.pom || pom;}catch(e){tasks=[]}
+      } else {
+        // sample task
+        tasks = [
+          {id:genId(),title:'Welcome to ProductivePulse',notes:'Try adding a task and start the Pomodoro!',priority:'low',tag:'Welcome',due:null,done:false,created:Date.now(),order:0}
+        ];
+      }
+    }
+
+    function genId(){return 't'+Math.random().toString(36).slice(2,9)}
+
+    function render(){
+      // filters + search
+      const q = search.value.trim().toLowerCase();
+      const filter = document.querySelector('.pill.active')?.dataset?.filter || 'all';
+
+      // sort by order
+      tasks.sort((a,b)=> (a.order||0)-(b.order||0));
+
+      taskList.innerHTML = '';
+      tasks.forEach(task=>{
+        if(filter==='active' && task.done) return;
+        if(filter==='completed' && !task.done) return;
+        if(filter==='today'){
+          if(!task.due) return;
+          const d = new Date(task.due);
+          const now = new Date();
+          if(d.toDateString() !== now.toDateString()) return;
+        }
+        if(filter==='overdue'){
+          if(!task.due) return;
+          const d = new Date(task.due);
+          if(d >= new Date() || task.done) return;
+        }
+        if(q){
+          const hay = (task.title+' '+(task.notes||'')+' '+(task.tag||'')).toLowerCase();
+          if(!hay.includes(q)) return;
+        }
+
+        const el = document.createElement('div');
+        el.className = 'task';
+        el.draggable = true;
+        el.dataset.id = task.id;
+
+        el.innerHTML = `
+          <div class="check" data-action="toggle">${task.done? '✓' : ''}</div>
+          <div style="flex:1">
+            <div class="title">${escapeHtml(task.title)}</div>
+            <div class="meta">${task.tag? '<span class="tag">'+escapeHtml(task.tag)+'</span>' : ''} ${task.due? ' • due '+formatDate(task.due) : ''} ${task.notes? ' • '+escapeHtml(task.notes.substring(0,80)) : ''}</div>
+          </div>
+          <div class="right">
+            <div class="meta ${task.priority === 'high' ? 'priority-high' : task.priority==='medium' ? 'priority-med' : 'priority-low'}">${task.priority}</div>
+            <button data-action="edit">Edit</button>
+            <button data-action="delete">Delete</button>
+          </div>
+        `;
+
+        // mark completed style
+        if(task.done){ el.style.opacity = 0.6; el.querySelector('.title').style.textDecoration='line-through' }
+        // overdue highlight
+        if(task.due && !task.done && new Date(task.due) < new Date()){
+          el.style.boxShadow = 'inset 0 0 0 2px rgba(255,107,107,0.06)';
+        }
+
+        taskList.appendChild(el);
+      });
+
+      // update stats
+      statTotal.textContent = tasks.length;
+      statDone.textContent = tasks.filter(t=>t.done).length;
+      statOver.textContent = tasks.filter(t=>t.due && !t.done && new Date(t.due) < new Date()).length;
+
+      save();
+    }
+
+    function escapeHtml(s){if(!s) return ''; return s.replace(/[&<>"']/g, (c)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" })[c])}
+    function formatDate(d){ const date = new Date(d); return date.toLocaleString(); }
+
+    // add task
+    addBtn.addEventListener('click', ()=>{
+      const title = titleEl.value.trim(); if(!title) return alert('Add a title');
+      const task = {id: genId(), title, notes:notesEl.value.trim(), priority:priorityEl.value, tag:tagEl.value.trim(), due: null, done:false, created:Date.now(), order: tasks.length};
+      if(dueDateEl.value){ let dt = dueDateEl.value; if(dueTimeEl.value) dt += 'T'+dueTimeEl.value; task.due = new Date(dt).toISOString(); }
+      tasks.push(task); clearForm(); render(); notifyIfNeeded(task);
+    });
+
+    function clearForm(){titleEl.value='';notesEl.value='';dueDateEl.value='';dueTimeEl.value='';priorityEl.value='low';tagEl.value=''; editId=null; updateBtn.style.display='none'; addBtn.style.display='inline-block'}
+
+    // delegate list actions
+    taskList.addEventListener('click', (e)=>{
+      const action = e.target.dataset.action;
+      const taskEl = e.target.closest('.task'); if(!taskEl) return;
+      const id = taskEl.dataset.id; const task = tasks.find(t=>t.id===id);
+      if(action==='toggle'){
+        task.done = !task.done; render();
+      } else if(action==='edit'){
+        editId = id; titleEl.value = task.title; notesEl.value = task.notes || ''; priorityEl.value = task.priority || 'low'; tagEl.value = task.tag || ''; if(task.due){ const d = new Date(task.due); dueDateEl.value = d.toISOString().slice(0,10); dueTimeEl.value = d.toTimeString().slice(0,5);} addBtn.style.display='none'; updateBtn.style.display='inline-block'; window.scrollTo({top:0,behavior:'smooth'});
+      } else if(action==='delete'){
+        if(confirm('Delete task?')){ tasks = tasks.filter(t=>t.id!==id); render(); }
+      }
+    });
+
+    updateBtn.addEventListener('click', ()=>{
+      if(!editId) return; const t = tasks.find(x=>x.id===editId); t.title = titleEl.value.trim(); t.notes = notesEl.value.trim(); t.priority = priorityEl.value; t.tag = tagEl.value.trim(); if(dueDateEl.value){ let dt = dueDateEl.value; if(dueTimeEl.value) dt += 'T'+dueTimeEl.value; t.due = new Date(dt).toISOString(); } else t.due = null; clearForm(); render();
+    });
+
+    // new task button
+    newTaskBtn.addEventListener('click', ()=>{ clearForm(); titleEl.focus(); });
+
+    // search
+    search.addEventListener('input', ()=>render());
+    document.querySelectorAll('.pill').forEach(p=>p.addEventListener('click', (e)=>{ document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active')); e.currentTarget.classList.add('active'); render(); }));
+    // set default active
+    document.querySelector('[data-filter="all"]').classList.add('active');
+
+    // clear
+    clearBtn.addEventListener('click', ()=>{ if(confirm('Clear all tasks? This can be restored with JSON export only.')){ tasks=[]; render(); }});
+    clearCompleted.addEventListener('click', ()=>{ tasks = tasks.filter(t=>!t.done); render(); });
+
+    // export/import
+    exportBtn.addEventListener('click', ()=>{ const data = JSON.stringify({tasks,pom}); download('productive_pulse_export.json', data); });
+    exportJson.addEventListener('click', ()=>{ const data = JSON.stringify({tasks,pom},null,2); download('productive_pulse_export.json', data); });
+    importBtn.addEventListener('click', ()=>{ jsonArea.style.display = jsonArea.style.display === 'none' ? 'block' : 'none'; });
+    importJson.addEventListener('click', ()=>{ const text = jsonArea.value.trim(); if(!text) return alert('Paste JSON first'); try{ const parsed = JSON.parse(text); tasks = parsed.tasks || tasks; pom = parsed.pom || pom; render(); jsonArea.value=''; jsonArea.style.display='none'; }catch(e){alert('Invalid JSON')} });
+
+    function download(filename, text){ const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type:'application/json'})); a.download = filename; a.click(); URL.revokeObjectURL(a.href); }
+
+    // drag & drop ordering
+    let dragSrc = null;
+    taskList.addEventListener('dragstart', (e)=>{
+      const el = e.target.closest('.task'); if(!el) return; dragSrc = el; el.classList.add('dragging'); e.dataTransfer.effectAllowed='move';
+    });
+    taskList.addEventListener('dragend', (e)=>{ if(dragSrc) dragSrc.classList.remove('dragging'); dragSrc=null; save(); });
+    taskList.addEventListener('dragover', (e)=>{ e.preventDefault(); const el = e.target.closest('.task'); if(!el || el === dragSrc) return; const rect = el.getBoundingClientRect(); const after = (e.clientY - rect.top) > rect.height/2; el.parentNode.insertBefore(dragSrc, after ? el.nextSibling : el); });
+    taskList.addEventListener('drop', (e)=>{ e.preventDefault(); // update order
+      Array.from(taskList.children).forEach((el,i)=>{ const id = el.dataset.id; const t = tasks.find(x=>x.id===id); if(t) t.order = i; }); render();
+    });
+
+    // keyboard shortcuts
+    document.addEventListener('keydown',(e)=>{
+      if(e.key==='/' && document.activeElement !== search){ e.preventDefault(); search.focus(); }
+      if(e.key.toLowerCase()==='n'){ titleEl.focus(); }
+      if(e.key.toLowerCase()==='d'){ toggleTheme(); }
+    });
+
+    // notifications for due tasks
+    function notifyIfNeeded(task){ try{ if('Notification' in window && Notification.permission === 'granted' && task.due){ const dd = new Date(task.due); const diff = dd - new Date(); if(diff > 0 && diff < 60*60*1000){ // due within 1 hour
+            new Notification('Task due soon: '+task.title, {body: 'Due at '+(new Date(task.due)).toLocaleTimeString()});
+          }} }catch(e){}
+    }
+
+    // ask for permission when app starts
+    if('Notification' in window && Notification.permission !== 'granted'){
+      try{ Notification.requestPermission(); }catch(e){}
+    }
+
+    // Pomodoro logic
+    function updateTimerDisplay(){ const m = Math.floor(pom.remaining/60).toString().padStart(2,'0'); const s = (pom.remaining%60).toString().padStart(2,'0'); timerEl.textContent = `${m}:${s}`; sessionsDoneEl.textContent = pom.sessions; }
+    function startPomodoro(){ if(pom.running) return; pom.running=true; pom.interval = setInterval(()=>{
+        pom.remaining -=1; if(pom.remaining <=0){
+          // switch mode
+          if(pom.mode==='work'){ pom.sessions +=1; pom.mode='break'; pom.remaining = pom.break; notify('Work session finished! Time for a break.'); }
+          else { pom.mode='work'; pom.remaining = pom.work; notify('Break over! Back to work.'); }
+        }
+        updateTimerDisplay(); save();
+      },1000); }
+    function stopPomodoro(){ if(!pom.running) return; pom.running=false; clearInterval(pom.interval); pom.interval=null; }
+    function skipPomodoro(){ stopPomodoro(); if(pom.mode==='work'){ pom.mode='break'; pom.remaining = pom.break; } else { pom.mode='work'; pom.remaining = pom.work; } updateTimerDisplay(); save(); }
+
+    startPom.addEventListener('click', ()=> startPomodoro());
+    stopPom.addEventListener('click', ()=> stopPomodoro());
+    skipPom.addEventListener('click', ()=> skipPomodoro());
+
+    function notify(msg){ try{ if('Notification' in window && Notification.permission === 'granted'){ new Notification('ProductivePulse', {body:msg}); } else { console.log('Notify:',msg); } }catch(e){console.log(e)} }
+
+    // theme toggle (simple)
+    function toggleTheme(){ if(document.documentElement.style.getPropertyValue('--bg') === ''){
+        document.documentElement.style.setProperty('--bg','');
+      }
+      if(document.body.dataset.dark==='true'){ document.body.dataset.dark='false'; document.documentElement.style.setProperty('--card','#0b1220'); }
+      else { document.body.dataset.dark='true'; document.documentElement.style.setProperty('--card','#071021'); }
+    }
+
+    // periodic check for due soon tasks (runs every minute)
+    setInterval(()=>{
+      const now = Date.now(); tasks.forEach(t=>{ if(t.due && !t.done){ const diff = new Date(t.due) - now; if(diff>0 && diff<60*1000 && !t._notified){ // less than 1 minute
+            try{ if('Notification' in window && Notification.permission==='granted'){ new Notification('Due soon: '+t.title, {body:'Due at '+new Date(t.due).toLocaleTimeString()}); } }catch(e){}; t._notified = true; save(); }
+      }});
+    }, 60*1000);
+
+    // export on unload
+    window.addEventListener('beforeunload', ()=> save());
+
+    // utils: load & initial render
+    load(); updateTimerDisplay(); render();
+
+    // small helper: populate sample order if missing
+    tasks.forEach((t,i)=>{ if(typeof t.order === 'undefined') t.order = i });
+
+    // helpful UI for import textarea toggle
+    exportBtn.addEventListener('click', ()=>{ jsonArea.style.display='none' });
+
+    // initial tiny tutorial (only first time)
+    if(!localStorage.getItem('productive_pulse_seen_tour')){
+      setTimeout(()=>alert('Welcome to ProductivePulse! Tip: press "/" to focus search, press "N" to quickly add a new task, and try the Pomodoro on the left.'),600);
+      localStorage.setItem('productive_pulse_seen_tour','1');
+    }
+
+  </script>
+</body>
 </html>
