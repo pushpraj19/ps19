@@ -1,5 +1,4 @@
 
-         
 export default async function handler(req, res) {
 
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -14,13 +13,13 @@ export default async function handler(req, res) {
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
-      "Authorization": "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",
+      "Authorization": "Bearer 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",
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
       model: "mistralai/mistral-7b-instruct",
       messages: [
-        { role: "system", content: "You are an English trainer." },
+        { role: "system", content: "You are an English trainer. Correct grammar and ask questions." },
         { role: "user", content: userMsg }
       ]
     })
