@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>English AI Trainer</title>
+  <title>Local English AI</title>
   <style>
     body { font-family: Arial; background:#0f172a; color:white; text-align:center; }
     #chat { width:90%; max-width:600px; margin:auto; height:400px; overflow:auto; background:#020617; padding:10px; border-radius:10px; }
@@ -11,7 +11,7 @@
 </head>
 <body>
 
-<h2>🧠 English AI Trainer</h2>
+<h2>🧠 Offline English AI Trainer</h2>
 
 <div id="chat"></div>
 
@@ -19,21 +19,42 @@
 <button onclick="send()">Send</button>
 
 <script>
-async function send() {
+function send() {
   let msg = document.getElementById("msg").value;
   let chat = document.getElementById("chat");
 
+  if (!msg) return;
+
   chat.innerHTML += "<p><b>You:</b> " + msg + "</p>";
 
-  let res = await fetch("/api/chat", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ message: msg })
-  });
+  let reply = generateReply(msg.toLowerCase());
 
-  let data = await res.json();
+  chat.innerHTML += "<p><b>AI:</b> " + reply + "</p>";
 
-  chat.innerHTML += "<p><b>AI:</b> " + data.reply + "</p>";
+  document.getElementById("msg").value = "";
+}
+
+function generateReply(text) {
+
+  // 🔥 RULE 1: Grammar fixes (simple patterns)
+  if (text.includes(" i ") && text.includes(" go ") && text.includes(" yesterday")) {
+    return "❌ Correct: I went yesterday.\n💡 'Go' past tense is 'went'.";
+  }
+
+  if (text.includes("i am agree")) {
+    return "❌ Correct: I agree.\n💡 We don't say 'am agree'.";
+  }
+
+  if (text.includes("how are you")) {
+    return "I'm fine 😏 How about you?";
+  }
+
+  if (text.includes("hello")) {
+    return "Hello! Let's practice English together 😄";
+  }
+
+  // 🔥 DEFAULT RESPONSE (AI-like behavior)
+  return "Interesting sentence 😏 Try rewriting it in better English.";
 }
 </script>
 
