@@ -2,150 +2,2106 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Local AI Trainer</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local AI English Trainer</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --card: #151d30;
+    --border: #1e2a42;
+    --fg: #e8edf5;
+    --muted: #7b8ba5;
+    --accent: #f0a500;
+    --accent-dim: rgba(240,165,0,0.12);
+    --accent-hover: #d4940a;
+    --success: #22c55e;
+    --error: #ef4444;
+    --info: #38bdf8;
+    --user-bg: linear-gradient(135deg, #b45309, #d97706);
+    --ai-bg: #151d30;
+    --radius: 14px;
+    --font: 'Space Grotesk', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
   body {
-    margin: 0;
-    font-family: Arial;
-    background: #0b0f19;
-    color: white;
-    display: flex;
-    flex-direction: column;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--fg);
     height: 100vh;
+    display: flex;
+    overflow: hidden;
   }
 
-  /* Header */
-  .topbar {
-    padding: 15px;
-    text-align: center;
-    background: #111827;
-    font-weight: bold;
-    border-bottom: 1px solid #222;
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 15% 50%, rgba(240,165,0,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 85% 25%, rgba(56,189,248,0.025) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 50% 90%, rgba(139,92,246,0.02) 0%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+    animation: bgPulse 15s ease-in-out infinite alternate;
   }
 
-  /* Chat area */
-  #chat {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
+  @keyframes bgPulse {
+    0% { opacity: 0.8; }
+    100% { opacity: 1.2; }
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
+    z-index: 2;
+    position: relative;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sidebar-header .logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--accent-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--accent);
+  }
+
+  .sidebar-header h1 {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .sidebar-header h1 span {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .stats-grid {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
 
-  .msg {
-    padding: 10px 14px;
-    border-radius: 12px;
-    max-width: 75%;
-    white-space: pre-wrap;
-  }
-
-  .user {
-    background: #2563eb;
-    align-self: flex-end;
-  }
-
-  .ai {
-    background: #1f2937;
-    align-self: flex-start;
-  }
-
-  /* Input area */
-  .input-box {
-    display: flex;
-    padding: 10px;
-    border-top: 1px solid #222;
-    background: #111827;
-  }
-
-  input {
-    flex: 1;
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
     padding: 12px;
-    border: none;
+    text-align: center;
+  }
+
+  .stat-card .stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--mono);
+  }
+
+  .stat-card .stat-value.green { color: var(--success); }
+  .stat-card .stat-value.blue { color: var(--info); }
+
+  .stat-card .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+
+  .level-section {
+    padding: 0 16px 16px;
+  }
+
+  .level-bar-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+  }
+
+  .level-bar-wrap .level-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .level-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  .level-bar-wrap .level-pct {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .level-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .level-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #fbbf24);
+    border-radius: 3px;
+    transition: width 0.6s ease;
+    width: 0%;
+  }
+
+  .errors-section {
+    padding: 0 16px 16px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .errors-section h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .error-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(239,68,68,0.1);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,0.15);
+    margin: 0 6px 6px 0;
+  }
+
+  .error-tag .count {
+    background: rgba(239,68,68,0.2);
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+
+  .sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .reset-btn {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    outline: none;
-    background: #1f2937;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover {
+    border-color: var(--error);
+    color: var(--error);
+    background: rgba(239,68,68,0.05);
+  }
+
+  /* Main chat area */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+  }
+
+  .chat-header {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(17,24,39,0.6);
+    backdrop-filter: blur(12px);
+  }
+
+  .menu-toggle {
+    display: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+  }
+
+  .chat-header-text {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .chat-header-text strong {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  /* Chat messages */
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+  }
+
+  #chat::-webkit-scrollbar { width: 6px; }
+  #chat::-webkit-scrollbar-track { background: transparent; }
+  #chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .msg-wrap {
+    display: flex;
+    gap: 10px;
+    max-width: 78%;
+    animation: msgIn 0.35s ease-out;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-wrap.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-wrap.ai { align-self: flex-start; }
+
+  .msg-avatar {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    margin-top: 2px;
+  }
+
+  .msg-wrap.user .msg-avatar {
+    background: var(--user-bg);
     color: white;
   }
 
-  button {
-    margin-left: 10px;
-    padding: 12px 16px;
-    border: none;
-    border-radius: 8px;
-    background: #22c55e;
-    cursor: pointer;
-    font-weight: bold;
+  .msg-wrap.ai .msg-avatar {
+    background: var(--accent-dim);
+    color: var(--accent);
   }
 
-  button:hover {
-    background: #16a34a;
+  .msg-bubble {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    white-space: pre-wrap;
+    line-height: 1.6;
+    font-size: 14px;
+    position: relative;
+  }
+
+  .msg-wrap.user .msg-bubble {
+    background: var(--user-bg);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg-wrap.ai .msg-bubble {
+    background: var(--ai-bg);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    color: var(--fg);
+  }
+
+  .msg-bubble .correction {
+    display: block;
+    padding: 6px 10px;
+    margin: 6px 0;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .msg-bubble .correction.err {
+    background: rgba(239,68,68,0.08);
+    border-left: 3px solid var(--error);
+    color: #fca5a5;
+  }
+
+  .msg-bubble .correction.good {
+    background: rgba(34,197,94,0.08);
+    border-left: 3px solid var(--success);
+    color: #86efac;
+  }
+
+  .msg-bubble .correction.tip {
+    background: rgba(56,189,248,0.08);
+    border-left: 3px solid var(--info);
+    color: #7dd3fc;
+  }
+
+  .msg-bubble .correction .strike {
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+
+  .msg-bubble .correction .fix {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .msg-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-weight: 500;
+  }
+
+  .msg-score.high { background: rgba(34,197,94,0.12); color: #4ade80; }
+  .msg-score.mid { background: rgba(240,165,0,0.12); color: #fbbf24; }
+  .msg-score.low { background: rgba(239,68,68,0.12); color: #f87171; }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: none;
+    align-self: flex-start;
+    padding: 14px 20px;
+    background: var(--ai-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    border-bottom-left-radius: 4px;
+    gap: 5px;
+    align-items: center;
+    animation: msgIn 0.25s ease-out;
+  }
+
+  .typing-indicator.show { display: flex; }
+
+  .typing-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    animation: bounce 1.4s ease-in-out infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* Suggestions */
+  .suggestions {
+    padding: 8px 24px 4px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .sug-chip {
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font);
+  }
+
+  .sug-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  /* Input area */
+  .input-area {
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--border);
+    background: rgba(17,24,39,0.6);
+    backdrop-filter: blur(12px);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .input-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  .input-wrap textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+    color: var(--fg);
+    font-family: var(--font);
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    line-height: 1.5;
+    max-height: 120px;
+    min-height: 46px;
+    transition: border-color 0.2s;
+  }
+
+  .input-wrap textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .input-wrap textarea::placeholder { color: var(--muted); opacity: 0.6; }
+
+  .send-btn {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent);
+    color: #000;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .send-btn:hover { background: var(--accent-hover); transform: scale(1.05); }
+  .send-btn:active { transform: scale(0.95); }
+  .send-btn:disabled { opacity: 0.3; cursor: default; transform: none; }
+
+  .input-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    opacity: 0.5;
+  }
+
+  /* Welcome message */
+  .welcome {
+    text-align: center;
+    padding: 40px 20px 20px;
+  }
+
+  .welcome-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    background: var(--accent-dim);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 16px;
+    color: var(--accent);
+  }
+
+  .welcome h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .welcome p {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 400px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Overlay for mobile sidebar */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9;
+  }
+
+  .sidebar-overlay.show { display: block; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 10;
+      transform: translateX(-100%);
+    }
+
+    .sidebar.open { transform: translateX(0); }
+
+    .menu-toggle { display: flex; }
+
+    .msg-wrap { max-width: 88%; }
+
+    #chat { padding: 16px; }
+
+    .input-area { padding: 12px 16px 16px; }
+
+    .suggestions { padding: 8px 16px 4px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 </style>
 </head>
-
 <body>
 
-<div class="topbar">🧠 Local English AI Trainer</div>
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-<div id="chat"></div>
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo"><i class="fas fa-brain"></i></div>
+    <h1>AI Trainer<span>English Practice Engine</span></h1>
+  </div>
 
-<div class="input-box">
-  <input id="msg" placeholder="Type English..." />
-  <button onclick="send()">Send</button>
-</div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="statMsgs">0</div>
+      <div class="stat-label">Messages</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value green" id="statAccuracy">--</div>
+      <div class="stat-label">Accuracy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value blue" id="statStreak">0</div>
+      <div class="stat-label">Streak</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statTime">0:00</div>
+      <div class="stat-label">Session</div>
+    </div>
+  </div>
+
+  <div class="level-section">
+    <div class="level-bar-wrap">
+      <div class="level-top">
+        <span class="level-badge" id="levelBadge">Beginner</span>
+        <span class="level-pct" id="levelPct">0%</span>
+      </div>
+      <div class="level-bar">
+        <div class="level-bar-fill" id="levelFill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="errors-section">
+    <h3>Common Mistakes</h3>
+    <div id="errorTags"><span style="font-size:12px;color:var(--muted);">Start typing to see patterns...</span></div>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="reset-btn" onclick="resetSession()">
+      <i class="fas fa-rotate-right"></i> Reset Session
+    </button>
+  </div>
+</aside>
+
+<!-- Main Chat -->
+<main class="main">
+  <div class="chat-header">
+    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="status-dot"></div>
+    <div class="chat-header-text"><strong>Grammar Engine Active</strong> — Type anything in English</div>
+  </div>
+
+  <div id="chat">
+    <div class="welcome">
+      <div class="welcome-icon"><i class="fas fa-comments"></i></div>
+      <h2>Start Practicing English</h2>
+      <p>Write any sentence and I'll check your grammar, suggest better vocabulary, and keep the conversation going. The more you type, the smarter I get at helping you.</p>
+    </div>
+  </div>
+
+  <div class="typing-indicator" id="typingIndicator">
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+  </div>
+
+  <div class="suggestions" id="suggestions">
+    <button class="sug-chip" onclick="useSuggestion(this)">Yesterday I go to the market</button>
+    <button class="sug-chip" onclick="useSuggestion(this)">She don't like coffee</button>
+    <button class="sug-chip" onclick="useSuggestion(this)">I am agree with you</button>
+    <button class="sug-chip" onclick="useSuggestion(this)">Me and my friend went to park</button>
+    <button class="sug-chip" onclick="useSuggestion(this)">I have ate breakfast already</button>
+  </div>
+
+  <div class="input-area">
+    <div class="input-row">
+      <div class="input-wrap">
+        <textarea id="msgInput" placeholder="Type an English sentence..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      </div>
+      <button class="send-btn" id="sendBtn" onclick="send()" aria-label="Send message">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+    <div class="input-hint">Press Enter to send, Shift+Enter for new line</div>
+  </div>
+</main>
 
 <script>
-function addMessage(text, type) {
-  const div = document.createElement("div");
-  div.className = "msg " + type;
-  div.innerText = text;
-  document.getElementById("chat").appendChild(div);
-  document.getElementById("chat").scrollTop = 999999;
+/* =============================================================
+   DATA: Verbs, uncountable nouns, topics, vocabulary upgrades
+   ============================================================= */
+
+const IRREGULAR_VERBS = {
+  go:['went','gone'], eat:['ate','eaten'], see:['saw','seen'], take:['took','taken'],
+  give:['gave','given'], come:['came','come'], make:['made','made'], get:['got','got'],
+  find:['found','found'], think:['thought','thought'], say:['said','said'], tell:['told','told'],
+  do:['did','done'], have:['had','had'], be:['was','been'], begin:['began','begun'],
+  break:['broke','broken'], bring:['brought','brought'], build:['built','built'],
+  buy:['bought','bought'], catch:['caught','caught'], choose:['chose','chosen'],
+  draw:['drew','drawn'], drive:['drove','driven'], fall:['fell','fallen'],
+  feel:['felt','felt'], fly:['flew','flown'], forget:['forgot','forgotten'],
+  grow:['grew','grown'], hear:['heard','heard'], hide:['hid','hidden'],
+  hold:['held','held'], keep:['kept','kept'], leave:['left','left'],
+  lend:['lent','lent'], lose:['lost','lost'], meet:['met','met'],
+  pay:['paid','paid'], read:['read','read'], ride:['rode','ridden'],
+  run:['ran','run'], sell:['sold','sold'], send:['sent','sent'],
+  show:['showed','shown'], sing:['sang','sung'], sit:['sat','sat'],
+  sleep:['slept','slept'], speak:['spoke','spoken'], spend:['spent','spent'],
+  stand:['stood','stood'], swim:['swam','swum'], teach:['taught','taught'],
+  write:['wrote','written'], understand:['understood','understood'], cut:['cut','cut'],
+  hit:['hit','hit'], hurt:['hurt','hurt'], let:['let','let'], put:['put','put'],
+  set:['set','set'], shut:['shut','shut'], win:['won','won'], cost:['cost','cost'],
+  lead:['led','led'], mean:['meant','meant'], shoot:['shot','shot'],
+  wake:['woke','woken'], wear:['wore','worn'], bite:['bit','bitten'],
+  blow:['blew','blown'], throw:['threw','thrown'], grow:['grew','grown'],
+  know:['knew','known'], rise:['rose','risen'], shake:['shook','shaken'],
+  steal:['stole','stolen'], strike:['struck','struck'], swear:['swore','sworn'],
+  tear:['tore','torn'], wake:['woke','woken'], weep:['wept','wept'],
+  spread:['spread','spread'], cast:['cast','cast'], split:['split','split']
+};
+
+// 构建过去式 → 原形 的反向映射，用于检测 "did/didn't + 过去式" 错误
+const PAST_TO_BASE = {};
+for (const [base, forms] of Object.entries(IRREGULAR_VERBS)) {
+  PAST_TO_BASE[forms[0]] = base;
+  PAST_TO_BASE[forms[1]] = base;
+}
+
+const BASE_VERBS = new Set(Object.keys(IRREGULAR_VERBS).concat([
+  'walk','talk','play','work','live','love','like','want','need','try','use','open',
+  'close','start','stop','finish','help','call','ask','answer','look','watch',
+  'listen','wait','learn','study','teach','read','write','change','move','turn',
+  'follow','add','include','provide','offer','allow','accept','receive','create',
+  'develop','improve','increase','reduce','consider','expect','hope','wish',
+  'plan','prepare','continue','remain','appear','happen','require','contain',
+  'suggest','recommend','compare','collect','organize','manage','control',
+  'support','protect','serve','apply','achieve','succeed','fail','attempt',
+  'refuse','warn','promise','admit','deny','explain','describe','discuss',
+  'decide','believe','remember','enjoy','hate','miss','pick','carry',
+  'pull','push','reach','raise','choose','discover','invent','design','solve',
+  'test','research','examine','explore','search','replace','remove','destroy',
+  'repair','fix','attach','hang','wear','dress','wash','clean','brush',
+  'rest','relax','exercise','cook','bake','fill','cover','touch','press',
+  'smile','laugh','cry','shout','sing','dance','jump','climb','kick','nod',
+  'notice','observe','recognize','identify','produce','present','introduce',
+  'mention','refer','connect','separate','divide','combine','mix','wrap',
+  'pack','deliver','publish','announce','report','measure','join','check',
+  'mark','pass','enter','return','arrive','travel','visit','stay','wander',
+  'rush','crawl','hide','seek','chase','escape','attack','defend','fight',
+  'compete','score','drop','lift','swing','spin','fold','load','install',
+  'update','reset','switch','plug','connect','disconnect','link','lock',
+  'unlock','seal','crash','smash','crush','squeeze','drag','toss','pitch',
+  'slap','punch','stab','fire','launch','release','permit','forbid','ban',
+  'prevent','block','pause','resume','complete','end','cancel','quit',
+  'surrender','yield','submit','obey','guide','direct','steer','navigate',
+  'pilot','ride','cycle','row','sail','glide','float','sink','dive','surf',
+  'skate','ski','slide','slip','trip','stumble','collapse','present','exist',
+  'represent','indicate','involve','share','handle','process','generate',
+  'form','establish','maintain','sustain','deliver','conduct','perform',
+  'operate','function','assume','ensure','confirm','state','claim','argue',
+  'insist','demand','request','propose','approve','reject','dismiss',
+  'ignore','avoid','risk','threaten','blame','praise','reward','punish',
+  'charge','arrest','release','fine','judge','vote','elect','appoint',
+  'employ','hire','fire','train','coach','mentor','advise','counsel',
+  'comfort','encourage','motivate','inspire','convince','persuade','trick',
+  'cheat','lie','pretend','imagine','dream','guess','wonder','doubt',
+  'question','challenge','protest','complain','apologize','forgive','thank',
+  'congratulate','greet','invite','welcome','entertain','impress','surprise',
+  'shock','frighten','scare','bore','annoy','irritate','frustrate','confuse',
+  'embarrass','humiliate','offend','insult','tease','joke','celebrate','mourn'
+]));
+
+const UNCOUNTABLE = new Set([
+  'information','advice','furniture','equipment','homework','knowledge',
+  'research','evidence','progress','news','weather','traffic','luggage',
+  'baggage','money','rice','bread','water','milk','coffee','tea','sugar',
+  'salt','pepper','butter','cheese','meat','fish','fruit','food','music',
+  'art','literature','poetry','history','geography','mathematics','physics',
+  'chemistry','biology','economics','politics','software','hardware','machinery',
+  'clothing','jewelry','makeup','hair','stuff','junk','rubbish','garbage',
+  'trash','pollution','nature','scenery','justice','freedom','peace','happiness',
+  'sadness','anger','love','hate','fear','courage','luck','fun','entertainment',
+  'education','health','wealth','poverty','violence','safety','danger','trouble',
+  'difficulty','success','failure','beauty','truth','honesty','kindness',
+  'cruelty','intelligence','stupidity','wisdom','madness','energy','power',
+  'strength','weakness','speed','patience','respect','confidence','pride',
+  'shame','guilt','jealousy','envy','curiosity','interest','enthusiasm',
+  'boredom','relief','stress','pressure','sleep','breakfast','lunch','dinner',
+  'tea','supper','exercise','housework','smoking','violence','help','support'
+]);
+
+const VOCAB_UPGRADES = {
+  'very good': ['excellent','outstanding','superb','remarkable'],
+  'very bad': ['terrible','awful','dreadful','atrocious'],
+  'very nice': ['delightful','wonderful','lovely','charming'],
+  'very big': ['enormous','massive','immense','vast'],
+  'very small': ['tiny','minuscule','compact','petite'],
+  'very tired': ['exhausted','drained','weary','fatigued'],
+  'very happy': ['thrilled','ecstatic','elated','overjoyed'],
+  'very sad': ['devastated','heartbroken','despondent','grief-stricken'],
+  'very angry': ['furious','enraged','livid','incensed'],
+  'very scared': ['terrified','petrified','fearful','alarmed'],
+  'very important': ['crucial','essential','vital','paramount'],
+  'very interesting': ['fascinating','captivating','intriguing','compelling'],
+  'very difficult': ['challenging','arduous','formidable','demanding'],
+  'very easy': ['effortless','straightforward','simple','elementary'],
+  'very beautiful': ['gorgeous','stunning','breathtaking','magnificent'],
+  'very ugly': ['hideous','unsightly','grotesque','repulsive'],
+  'very fast': ['rapid','swift','brisk','prompt'],
+  'very slow': ['sluggish','leisurely','gradual','measured'],
+  'a lot of': ['numerous','plentiful','abundant','substantial'],
+  'i think': ['I believe','I consider','In my view','From my perspective'],
+  'nice': ['pleasant','agreeable','satisfying','appealing'],
+  'good': ['solid','commendable','admirable','fine'],
+  'bad': ['poor','subpar','inadequate','dismal'],
+  'big': ['large','spacious','sizable','considerable'],
+  'small': ['modest','little','compact','slight'],
+  'said': ['mentioned','stated','remarked','noted'],
+  'got': ['received','obtained','acquired','secured'],
+  'things': ['aspects','elements','matters','details'],
+  'stuff': ['belongings','materials','items','possessions'],
+  'help': ['assist','support','aid','facilitate'],
+  'show': ['demonstrate','illustrate','reveal','present'],
+  'old': ['elderly','aged','vintage','seasoned'],
+  'new': ['recent','novel','fresh','innovative'],
+  'funny': ['humorous','amusing','hilarious','witty'],
+  'smart': ['intelligent','brilliant','astute','perceptive'],
+  'pretty': ['attractive','elegant','lovely','appealing'],
+  'hard': ['difficult','demanding','rigorous','challenging'],
+  'like': ['enjoy','appreciate','relish','favor'],
+};
+
+const TOPICS = {
+  work: {
+    keywords: ['work','job','career','office','boss','colleague','meeting','salary','company','business','manager','employee','interview','hire','project','deadline','client','profession','workplace','promotion','resume'],
+    followUps: [
+      "What do you enjoy most about your work?",
+      "How long have you been in this field?",
+      "What would your ideal work environment look like?",
+      "Can you describe a challenging situation at work?",
+      "What skills are most important for your job?"
+    ]
+  },
+  food: {
+    keywords: ['food','cook','eat','restaurant','meal','breakfast','lunch','dinner','recipe','kitchen','hungry','delicious','taste','chef','bake','dish','flavor','ingredient','spicy','sweet','pizza','rice','chicken','soup','salad'],
+    followUps: [
+      "What's your favorite dish to cook at home?",
+      "Do you prefer eating out or cooking your own meals?",
+      "Can you describe the best meal you've ever had?",
+      "Are there any foods you absolutely dislike?",
+      "What's a typical meal in your culture?"
+    ]
+  },
+  travel: {
+    keywords: ['travel','trip','country','city','flight','hotel','beach','mountain','vacation','holiday','visit','tourist','passport','luggage','airport','train','bus','abroad','adventure','explore','destination','journey','sightseeing'],
+    followUps: [
+      "Where was your most memorable trip?",
+      "Do you prefer mountains or beaches when traveling?",
+      "What's the most interesting place you've ever visited?",
+      "Do you enjoy planning trips or being spontaneous?",
+      "What country would you like to visit next?"
+    ]
+  },
+  family: {
+    keywords: ['family','mother','father','brother','sister','parent','child','children','son','daughter','wife','husband','grandmother','grandfather','uncle','aunt','cousin','baby','married','wedding'],
+    followUps: [
+      "How many people are in your family?",
+      "What do you enjoy doing together with your family?",
+      "Who in your family are you closest to?",
+      "Can you describe a memorable family celebration?",
+      "Do you have any family traditions?"
+    ]
+  },
+  entertainment: {
+    keywords: ['movie','film','music','song','book','game','series','show','concert','actor','singer','band','album','novel','story','theater','cinema','watch','listen','read','play','netflix','youtube','video'],
+    followUps: [
+      "What kind of movies do you usually watch?",
+      "Do you prefer reading books or watching movies?",
+      "Who is your favorite singer or band?",
+      "Can you recommend a good series to watch?",
+      "What was the last concert or event you attended?"
+    ]
+  },
+  health: {
+    keywords: ['health','doctor','hospital','sick','medicine','exercise','gym','diet','sleep','headache','fever','cold','pain','stress','mental','physical','treatment','symptom','disease','injury','wellness','yoga','meditation'],
+    followUps: [
+      "What do you do to stay healthy?",
+      "How often do you exercise in a week?",
+      "Do you think mental health is as important as physical health?",
+      "Have you tried any special diets or fitness routines?",
+      "How do you usually deal with stress?"
+    ]
+  },
+  weather: {
+    keywords: ['weather','rain','sun','snow','wind','cold','hot','warm','cloud','storm','temperature','summer','winter','spring','autumn','forecast','humid','dry','fog','ice','freeze'],
+    followUps: [
+      "What's your favorite season and why?",
+      "Does the weather affect your mood?",
+      "What's the weather usually like where you live?",
+      "Do you prefer hot weather or cold weather?",
+      "Have you ever experienced extreme weather?"
+    ]
+  },
+  technology: {
+    keywords: ['computer','phone','internet','app','software','hardware','technology','digital','website','program','code','data','AI','robot','online','social media','email','laptop','tablet','smart','gadget','download','upload'],
+    followUps: [
+      "How has technology changed your daily life?",
+      "What device do you use the most?",
+      "Do you think AI will change how we work?",
+      "Are there any apps you can't live without?",
+      "What do you think about social media?"
+    ]
+  },
+  education: {
+    keywords: ['school','university','study','learn','teacher','student','class','exam','test','homework','grade','subject','math','science','english','degree','college','lecture','course','education','academic','library','textbook'],
+    followUps: [
+      "What was your favorite subject in school?",
+      "Do you think education has changed in recent years?",
+      "What's the most important skill to learn nowadays?",
+      "Can you describe a teacher who influenced you?",
+      "Do you prefer learning in a classroom or online?"
+    ]
+  },
+  hobbies: {
+    keywords: ['hobby','paint','draw','photo','garden','dance','sing','sport','football','basketball','tennis','swim','run','cycle','hike','camp','fish','chess','puzzle','craft','sew','knit','collect','volunteer'],
+    followUps: [
+      "How did you get into this hobby?",
+      "How much time do you spend on your hobbies each week?",
+      "Is there a new hobby you'd like to try?",
+      "Has any hobby taught you an important life lesson?",
+      "Do you have friends who share your hobbies?"
+    ]
+  }
+};
+
+const POSITIVE_WORDS = new Set([
+  'good','great','nice','happy','love','amazing','wonderful','excellent','fantastic',
+  'beautiful','perfect','awesome','brilliant','outstanding','superb','delightful',
+  'pleasant','enjoy','fun','excited','grateful','thankful','proud','satisfied',
+  'comfortable','relaxed','calm','peaceful','lucky','successful','confident',
+  'hopeful','inspired','motivated','cheerful','glad','pleased','thrilled',
+  'best','better','favorite','incredible','magnificent','marvelous','remarkable',
+  'terrific','tremendous','valuable','worthwhile'
+]);
+
+const NEGATIVE_WORDS = new Set([
+  'bad','sad','hate','terrible','awful','horrible','ugly','stupid','boring',
+  'angry','disappointed','frustrated','annoyed','worried','anxious','scared',
+  'afraid','lonely','tired','exhausted','sick','difficult','hard','painful',
+  'stressful','confusing','complicated','worst','worse','poor','miserable',
+  'depressed','unhappy','upset','nervous','embarrassed','ashamed','guilty',
+  'jealous','regret','fail','failure','problem','trouble','wrong','broken'
+]);
+
+/* =============================================================
+   GRAMMAR CHECKER ENGINE
+   ============================================================= */
+
+class GrammarChecker {
+  check(text) {
+    const errors = [];
+    const lower = text.toLowerCase();
+
+    errors.push(...this.checkThirdPerson(text));
+    errors.push(...this.checkIAmVerb(text));
+    errors.push(...this.checkUncountablePlural(text));
+    errors.push(...this.checkDoubleComparative(text));
+    errors.push(...this.checkTimeTenseMismatch(text));
+    errors.push(...this.checkConfusedWords(text));
+    errors.push(...this.checkArticleAn(text));
+    errors.push(...this.checkDidPastTense(text));
+    errors.push(...this.checkHaveParticiple(text));
+    errors.push(...this.checkDoubleNegative(text));
+    errors.push(...this.checkMeAndSomeone(text));
+    errors.push(...this.checkCouldAbleTo(text));
+    errors.push(...this.checkSuggestTo(text));
+    errors.push(...this.checkLookingForwardTo(text));
+    errors.push(...this.checkDespiteOf(text));
+    errors.push(...this.checkCapitalization(text));
+    errors.push(...this.checkMuchCountable(text));
+    errors.push(...this.checkWillPastTense(text));
+
+    // 去重
+    const seen = new Set();
+    return errors.filter(e => {
+      const key = e.original + '→' + e.corrected;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  // 规则1: 第三人称单数 (he/she/it + base verb)
+  checkThirdPerson(text) {
+    const errors = [];
+    const auxiliaries = new Set([
+      'is','am','are','was','were','be','been','being','has','have','had',
+      'do','does','did','will','would','shall','should','can','could',
+      'may','might','must','not',"n't",'to'
+    ]);
+    // 处理缩写: doesn't, don't, didn't, won't, wouldn't, can't, couldn't
+    const words = text.split(/\s+/);
+
+    for (let i = 0; i < words.length; i++) {
+      const clean = words[i].toLowerCase().replace(/[^a-z']/g, '');
+      if (!['he','she','it'].includes(clean)) continue;
+
+      let j = i + 1;
+      let skippedAux = false;
+
+      while (j < words.length) {
+        const nw = words[j].toLowerCase().replace(/[^a-z']/g, '');
+        if (!nw) { j++; continue; }
+
+        if (auxiliaries.has(nw) || nw.endsWith("n't")) {
+          skippedAux = true;
+          j++;
+          continue;
+        }
+
+        // 到达第一个实词
+        if (BASE_VERBS.has(nw) && !this.isThirdPersonForm(nw)) {
+          if (!skippedAux) {
+            errors.push({
+              original: words[j],
+              corrected: this.conjugateThird(nw),
+              explanation: `After "${clean}", use "${this.conjugateThird(nw)}" (third person singular).`,
+              category: 'Subject-Verb Agreement',
+              severity: 'grammar'
+            });
+          }
+        }
+        break;
+      }
+    }
+    return errors;
+  }
+
+  isThirdPersonForm(w) {
+    if (w.endsWith('ies') && w.length > 4) return true;
+    if (w.endsWith('es') && w.length > 3 && !['does','goes','does'].includes(w) || ['watches','catches','pushes','washes','teaches','touches','reaches','passes','misses','bosses','boxes','fixes','mixes','relaxes','goes','does','buzzes','fizzes','quizzes'].includes(w)) {
+      if (w.endsWith('es') && w.length > 3) {
+        // 检查是否为合法的第三人称es形式
+        const stem = w.slice(0, -2);
+        if (/[sxz]$/.test(stem) || /ch|sh$/.test(stem)) return true;
+        if (stem.endsWith('e') && w.length > 4) return false; // e.g. "loves" → "lov" + "es"? No, "love" + "s"
+      }
+    }
+    if (w.endsWith('s') && !w.endsWith('ss') && w.length > 2) {
+      // 排除一些以s结尾但不是第三人称的词
+      const stem = w.slice(0, -1);
+      if (BASE_VERBS.has(stem)) return true;
+      if (stem.endsWith('ie')) return false; // "lies" = lie+es (correct 3rd person via ies rule already handled)
+    }
+    return false;
+  }
+
+  conjugateThird(w) {
+    if (w === 'have') return 'has';
+    if (w === 'be') return 'is';
+    if (w === 'do') return 'does';
+    if (w.endsWith('y') && !/[aeiou]y$/.test(w)) return w.slice(0, -1) + 'ies';
+    if (/[sxz]$/.test(w) || /ch|sh$/.test(w)) return w + 'es';
+    return w + 's';
+  }
+
+  // 规则2: "I am agree/enjoy/understand/like..." → 去掉 am
+  checkIAmVerb(text) {
+    const errors = [];
+    const pattern = /\bi\s+am\s+(agree|enjoy|understand|like|love|hate|want|need|prefer|know|believe|feel|think|hope|wish|remember|forget|mean|recognize|realize|imagine|doubt|suppose|wonder|disagree|object|mind|care|starve|freeze|sweat|bleed|ache)\b/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      errors.push({
+        original: `I am ${match[1]}`,
+        corrected: `I ${match[1]}`,
+        explanation: `"${match[1]}" is a verb, so don't use "am" before it. Just say "I ${match[1]}".`,
+        category: 'Verb Usage',
+        severity: 'grammar'
+      });
+    }
+    return errors;
+  }
+
+  // 规则3: 不可数名词加复数 -s
+  checkUncountablePlural(text) {
+    const errors = [];
+    const pattern = /\b(informations|advices|furnitures|equipments|homeworks|knowledges|researches|evidences|progresses|news|weathers|traffics|luggages|baggages|moneys|rices|breads|waters|milks|coffees|teas|sugars|salts|butters|cheeses|meats|fishes|fruits|foods|musics|arts|literatures|poetries|histories|geographies|mathematics|physics|chemistries|biologies|economics|politics|softwares|hardwares|machineries|clothings|jewelries|makeups|hairs|stuffs|junks|rubbishes|garbages|trashes|pollutions|natures|sceneries|justices|freedoms|peaces|happinesses|sadnesses|angers|loves|hates|fears|courages|lucks|funs|entertainments|educations|healths|wealths|poverties|violences|safeties|dangers|troubles|difficulties|successes|failures|beauties|truths|honesties|kindnesses|cruelties|intelligences|stupidities|wisdoms|madnesses|energies|powers|strengths|weaknesses|speeds|patiences|respects|confidences|prides|shames|guilts|jealousies|envies|curiosities|interests|enthusiasms|boredoms|reliefs|stresses|pressures|sleeps|breakfasts|lunches|dinners|suppers|exercises|houseworks|smokings|helps|supports)\b/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const base = match[1].toLowerCase();
+      // 排除一些可以是可数的词
+      if (['foods','fruits','fishes','teas','coffees','waters','breads','cheeses','meats','sugars','salts','butters','powers','strengths','speeds','interests','successes','failures','truths','beauties','natures','pressures','energies','freedoms','peaces','loves','angers','fears','hates','troubles','difficulties','arts','histories','politics','economics','physics'].includes(base)) continue;
+      errors.push({
+        original: match[1],
+        corrected: match[1].replace(/s$/i, '').replace(/es$/i, ''),
+        explanation: `"${match[1].replace(/s$/i,'').replace(/es$/i,'')}" is uncountable. It doesn't take a plural -s.`,
+        category: 'Countability',
+        severity: 'grammar'
+      });
+    }
+    return errors;
+  }
+
+  // 规则4: 双重比较级
+  checkDoubleComparative(text) {
+    const errors = [];
+    const pattern = /\b(more)\s+(better|worse|bigger|smaller|taller|shorter|older|younger|faster|slower|stronger|weaker|smarter|dumber|richer|poorer|hotter|colder|warmer|cooler|darker|lighter|thicker|thinner|heavier|lighter|happier|sadder|angrier|easier|harder|nicer|meaner|cleaner|dirtier|quieter|louder)\b/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      errors.push({
+        original: `${match[1]} ${match[2]}`,
+        corrected: match[2],
+        explanation: `"${match[2]}" is already comparative. Don't add "more" before it.`,
+        category: 'Comparison',
+        severity: 'grammar'
+      });
+    }
+    const pattern2 = /\b(most)\s+(biggest|smallest|tallest|shortest|oldest|youngest|fastest|slowest|strongest|weakest|smartest|richest|poorest|hottest|coldest|warmest|coolest|darkest|lightest|thickest|thinnest|heaviest|happiest|saddest|angriest|easiest|hardest|nicest|meanest|cleanest|dirtiest|quietest|loudest|best|worst)\b/gi;
+    while ((match = pattern2.exec(text)) !== null) {
+      errors.push({
+        original: `${match[1]} ${match[2]}`,
+        corrected: match[2],
+        explanation: `"${match[2]}" is already superlative. Don't add "most" before it.`,
+        category: 'Comparison',
+        severity: 'grammar'
+      });
+    }
+    return errors;
+  }
+
+  // 规则5: 时间词与 tense 不匹配
+  checkTimeTenseMismatch(text) {
+    const errors = [];
+    const lower = text.toLowerCase();
+    const words = lower.split(/\s+/);
+
+    // 过去时间词 + 现在时
+    const pastTimeWords = ['yesterday','last week','last month','last year','last night','last time','ago'];
+    for (const ptw of pastTimeWords) {
+      if (lower.includes(ptw)) {
+        // 检查是否有过去式动词
+        for (let i = 0; i < words.length; i++) {
+          if (words[i] === ptw || words[i].includes(ptw)) {
+            // 在这个时间词之后找动词
+            for (let j = i + 1; j < words.length; j++) {
+              const w = words[j].replace(/[^a-z]/g, '');
+              if (BASE_VERBS.has(w) && !w.endsWith('ed') && !IRREGULAR_VERBS[w]) {
+                // 也排除已经是过去式的不规则动词
+                const isPast = Object.values(IRREGULAR_VERBS).some(v => v[0] === w);
+                if (!isPast && !this.isThirdPersonForm(w)) {
+                  // 检查前面是否有助动词
+                  const prevWords = words.slice(Math.max(0, j-2), j);
+                  const hasAux = prevWords.some(pw =>
+                    ['did','didn\'t','did not','was','were','had','has','have','would','could','should','might','will','to'].includes(pw.replace(/[^a-z']/g,''))
+                  );
+                  if (!hasAux) {
+                    let corrected = w;
+                    if (IRREGULAR_VERBS[w]) corrected = IRREGULAR_VERBS[w][0];
+                    else if (w.endsWith('e')) corrected = w + 'd';
+                    else corrected = w + 'ed';
+
+                    errors.push({
+                      original: w,
+                      corrected: corrected,
+                      explanation: `Since you mentioned "${ptw}", use past tense "${corrected}" instead of "${w}".`,
+                      category: 'Tense',
+                      severity: 'grammar'
+                    });
+                  }
+                }
+              }
+            }
+            break;
+          }
+        }
+      }
+    }
+    return errors;
+  }
+
+  // 规则6: 易混淆词
+  checkConfusedWords(text) {
+    const errors = [];
+    const lower = text.toLowerCase();
+
+    // their/there/they're
+    const theyrePattern = /\bthey're\s+(?:is|are|was|were|has|have|had|will|would|can|could|going|not|a|an|the|my|your|his|her|its|our|their|very|really|quite|so|too|also|just|still|already|always|never|often|sometimes|here|there|now|then|today|tomorrow|yesterday)\b/gi;
+    // their 用作 there 的意思 (地点)
+    const theirAsThere = /\btheir\s+(is|are|was|were|will|going)\b/gi;
+
+    // "your" 用作 "you're"
+    const yourAsYoure = /\byour\s+(is|are|was|were|has|have|had|will|would|can|could|should|might|must|going|not|a|an|the|very|really|quite|so|too|also|just|still|already|always|never|welcome|right|wrong|correct|incorrect|smart|clever|kind|nice|good|bad|beautiful|ugly|old|new|young|tall|short|big|small|fast|slow|early|late|ready|able|allowed|supposed|welcome|free|busy|tired|hungry|thirsty|sick|fine|okay|ok|great|amazing|awesome|wonderful|terrible|awful|horrible|lucky|unlucky|happy|sad|angry|mad|scared|afraid|bored|excited|interested|surprised|shocked|confused|disappointed|frustrated|annoyed|worried|nervous|comfortable|uncomfortable|similar|different|easy|hard|difficult|simple|complex|important|special|necessary|possible|impossible|likely|unlikely|clear|obvious|certain|sure|wrong|right|true|false|correct|incorrect)\b/gi;
+
+    let match;
+    while ((match = yourAsYoure.exec(text)) !== null) {
+      errors.push({
+        original: 'your ' + match[1],
+        corrected: "you're " + match[1],
+        explanation: `"your" shows possession. You mean "you are" (you're) here.`,
+        category: 'Confused Words',
+        severity: 'grammar'
+      });
+    }
+
+    // then/than
+    const thenAsThan = /\bthen\s+(me|him|her|us|them|before|after|earlier|later|expected|anticipated|predicted|usual|normal|average|anything|something|nothing|everything|that|this|what)\b/gi;
+    while ((match = thenAsThan.exec(text)) !== null) {
+      errors.push({
+        original: 'then ' + match[1],
+        corrected: 'than ' + match[1],
+        explanation: `Use "than" for comparisons, not "then". "Then" is for time/order.`,
+        category: 'Confused Words',
+        severity: 'grammar'
+      });
+    }
+
+    // its/it's
+    const itsAsItIs = /\bits\s+(is|are|was|were|has|have|had|been|going|not|a|an|the|very|really|quite|so|too|also|just|still|already|always|never|important|necessary|possible|impossible|likely|unlikely|clear|obvious|certain|true|false|wrong|right|correct|nice|good|bad|beautiful|ugly|big|small|fast|slow|hard|easy|difficult|simple|complex|amazing|terrible|wonderful|horrible|great|awful|perfect)\b/gi;
+    while ((match = itsAsItIs.exec(text)) !== null) {
+      errors.push({
+        original: 'its ' + match[1],
+        corrected: "it's " + match[1],
+        explanation: `"its" shows possession. You mean "it is" (it's) here.`,
+        category: 'Confused Words',
+        severity: 'grammar'
+      });
+    }
+
+    return errors;
+  }
+
+  // 规则7: a/an + 元音发音
+  checkArticleAn(text) {
+    const errors = [];
+    const pattern = /\ba\s+(apple|orange|egg|elephant|umbrella|uncle|idea|island|issue|ice|iron|hour|honest|honor|heir|herb|MBA|HTML|SQL|NATO|FBI|iPhone|iPad|email|exam|example|area|animal|answer|artist|actor|accident|account|argument|army|attempt|attention|atmosphere|attitude|audience|authority|avenue|award|energy|engine|envelope|episode|equal|error|escape|event|evolution|exact|example|excuse|exercise|experience|experiment|expert|explanation|expression|extra|extreme|organization|occasion|ocean|office|officer|official|operation|opinion|opportunity|opposite|option|order|ordinary|original|other|outfit|outcome|outline|output|opinion|article|adventure|adult|advance|advantage|advice|affair|airport|alarm|album|algorithm|alias|ambition|amount|analysis|ancestor|anger|angle|animal|annual|answer|anxiety|anxious|apartment|appeal|appearance|appetite|application|appointment|approach|approval|argument)\b/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const word = match[1];
+      // 排除以不发音u开头的词 (university, uniform, useful, unit, united, unique, universe, universal, usual)
+      if (/^u(ni|ni|se|ni|ni|se|ni|se)/i.test(word)) continue;
+      errors.push({
+        original: 'a ' + word,
+        corrected: 'an ' + word,
+        explanation: `Use "an" before words starting with a vowel sound: "an ${word}".`,
+        category: 'Articles',
+        severity: 'grammar'
+      });
+    }
+    return errors;
+  }
+
+  // 规则8: didn't + 过去式 (应该是 didn't + 原形)
+  checkDidPastTense(text) {
+    const errors = [];
+    const pattern = /\b(didn't|did not)\s+(\w+)\b/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const verb = match[2].toLowerCase().replace(/[^a-z]/g, '');
+      // 检查这个动词是不是过去式
+      if (PAST_TO_BASE[verb] && verb !== PAST_TO_BASE[verb]) {
+        errors.push({
+          original: `${match[1]} ${match[2]}`,
+          corrected: `${match[1]} ${PAST_TO_BASE[verb]}`,
+          explanation: `After "${match[1]}", use the base form "${PAST_TO_BASE[verb]}", not the past tense "${verb}".`,
+          category: 'Tense',
+          severity: 'grammar'
+        });
+      } else if (verb.endsWith('ed') && verb.length > 3) {
+        const base = verb.replace(/ed$/, '');
+        if (BASE_VERBS.has(base) || base.endsWith('e') && BASE_VERBS.has(base.slice(0,-1))) {
+          errors.push({
+            original: `${match[1]} ${match[2]}`,
+            corrected: `${match[1]} ${base.endsWith('e') && !BASE_VERBS.has(base) ? base.slice(0,-1) : base}`,
+            explanation: `After "${match[1]}", use the base form of the verb, not the past tense.`,
+            category: 'Tense',
+            severity: 'grammar'
+          });
+        }
+      }
+    }
+    return errors;
+  }
+
+  // 规则9: have/has + 过去式 (应该是 have/has + 过去分词)
+  checkHaveParticiple(text) {
+    const errors = [];
+    const pattern = /\b(have|has|had)\s+(\w+)\b/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const verb = match[2].toLowerCase().replace(/[^a-z]/g, '');
+      // 检查这个动词是否是不规则动词的过去式 (不是分词)
+      for (const [base, forms] of Object.entries(IRREGULAR_VERBS)) {
+        if (verb === forms[0] && forms[0] !== forms[1]) {
+          // 过去式 ≠ 分词的情况，如 went ≠ gone
+          errors.push({
+            original: `${match[1]} ${match[2]}`,
+            corrected: `${match[1]} ${forms[1]}`,
+            explanation: `After "${match[1]}", use the past participle "${forms[1]}", not the past tense "${forms[0]}".`,
+            category: 'Tense',
+            severity: 'grammar'
+          });
+        }
+      }
+    }
+    return errors;
+  }
+
+  // 规则10: 双重否定
+  checkDoubleNegative(text) {
+    const errors = [];
+    const lower = text.toLowerCase();
+    const negWords = ["don't","doesn't","didn't","not","no","never","nothing","nobody","nowhere","neither","hardly","scarcely","barely"];
+    const found = [];
+    for (const nw of negWords) {
+      if (lower.includes(nw)) found.push(nw);
+    }
+    if (found.length >= 2) {
+      errors.push({
+        original: text.slice(0, 60) + (text.length > 60 ? '...' : ''),
+        corrected: 'Remove one negative word',
+        explanation: `Double negative detected: "${found.join('" and "')}". In English, two negatives don't make a positive — they're grammatically incorrect. Use only one negative word.`,
+        category: 'Double Negative',
+        severity: 'grammar'
+      });
+    }
+    return errors;
+  }
+
+  // 规则11: "Me and X" → "X and I"
+  checkMeAndSomeone(text) {
+    const errors = [];
+    const pattern = /\bme\s+and\s+([a-z]+)\b/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      errors.push({
+        original: `Me and ${match[1]}`,
+        corrected: `${match[1].charAt(0).toUpperCase() + match[1].slice(1)} and I`,
+        explanation: `Use "${match[1]} and I" as the subject. "Me" is an object pronoun.`,
+        category: 'Pronouns',
+        severity: 'grammar'
+      });
+    }
+    return errors;
+  }
+
+  // 规则12: "could able to" / "can able to"
+  checkCouldAbleTo(text) {
+    const errors = [];
+    const pattern = /\b(can|could|would|should|may|might|must)\s+able\s+to\b/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      errors.push({
+        original: `${match[1]} able to`,
+        corrected: `${match[1]}`,
+        explanation: `"${match[1]}" is already a modal verb. Don't add "able to" — just say "${match[1]}". Or use "am/is/are able to" without the modal.`,
+        category: 'Verb Usage',
+        severity: 'grammar'
+      });
+    }
+    return errors;
+  }
+
+  // 规则13: "suggest to do" → "suggest doing"
+  checkSuggestTo(text) {
+    const errors = [];
+    const pattern = /\bsuggest\s+to\s+(\w+)\b/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const verb = match[1].toLowerCase().replace(/[^a-z]/g, '');
+      errors.push({
+        original: `suggest to ${verb}`,
+        corrected: `suggest ${verb.endsWith('e') ? verb.slice(0,-1) : verb}ing`,
+        explanation: `"Suggest" is followed by a gerund (-ing), not an infinitive (to). Say "suggest ${verb.endsWith('e') ? verb.slice(0,-1) : verb}ing".`,
+        category: 'Verb Pattern',
+        severity: 'grammar'
+      });
+    }
+    return errors;
+  }
+
+  // 规则14: "looking forward to + verb" → 应该用 -ing
+  checkLookingForwardTo(text) {
+    const errors = [];
+    const pattern = /\blooking\s+forward\s+to\s+(?!meet|see|hear|go|come|get|be|have|do|make|take|give|say|know|think|want|need|like|try|use|find|tell|ask|work|play|feel|eat|drink|sleep|run|walk|read|write|speak|learn|buy|bring|keep|leave|begin|start|stop|open|close|win|lose|meet|pay|spend|show|help|live|move|turn|fall|hold|put|set|cut|break|catch|throw|draw|drive|fly|swim|watch|listen|wait|look|give|love|hate|enjoy|finish|pick|carry|pull|push|reach|choose|forget|remember|believe|understand|explain|discuss|decide|change|follow|lead|join|add|include|provide|offer|allow|accept|receive|create|build|develop|improve|increase|reduce|consider|imagine|expect|hope|wish|plan|prepare|continue|appear|happen|require|contain|involve|suggest|recommend|announce|report|compare|collect|organize|manage|control|support|protect|apply|achieve|succeed|attempt|refuse|warn|promise|admit|deny|regret|apologize|forgive|blame|praise|reward|punish|publish|present|introduce|mention|refer|connect|separate|divide|combine|fill|cover|touch|press|strike|hit|kick|smile|laugh|cry|shout|sing|dance|jump|climb|slide|shake|wave|notice|observe|recognize|discover|design|solve|test|research|examine|explore|search|replace|remove|destroy|repair|fix|attach|hang|wear|dress|wash|clean|rest|relax|exercise|cook|bake|taste|smell|shine|glow|enter|return|arrive|travel|visit|stay|wander|rush|hurry|hide|seek|chase|escape|attack|defend|fight|compete|race|score|pass|drop|lift|swing|spin|fold|pack|load|deliver|install|update|reset|switch|plug|lock|unlock|seal|open|close|shut|crash|smash|drag|toss|pitch|fire|launch|release|let|allow|permit|forbid|prevent|block|pause|resume|complete|end|cancel|quit|surrender|yield|submit|obey|guide|direct|steer|navigate|pilot|ride|cycle|row|sail|glide|float|sink|dive|surf|skate|ski|slip|trip|stumble|collapse)(\w*)\b/gi;
+    // 其实用否定前瞻比较复杂，换一个方式
+    const simplePattern = /\blooking\s+forward\s+to\s+(to\s+)?(\w+)\b/gi;
+    let match;
+    while ((match = simplePattern.exec(text)) !== null) {
+      const verb = match[2].toLowerCase().replace(/[^a-z]/g, '');
+      if (BASE_VERBS.has(verb) && !verb.endsWith('ing')) {
+        errors.push({
+          original: `looking forward to ${verb}`,
+          corrected: `looking forward to ${verb.endsWith('e') ? verb.slice(0,-1) : verb}ing`,
+          explanation: `"Look forward to" uses a gerund (-ing), not a base verb. Say "looking forward to ${verb.endsWith('e') ? verb.slice(0,-1) : verb}ing".`,
+          category: 'Verb Pattern',
+          severity: 'grammar'
+        });
+      }
+    }
+    return errors;
+  }
+
+  // 规则15: "despite of" → "despite"
+  checkDespiteOf(text) {
+    const errors = [];
+    if (/\bdespite\s+of\b/gi.test(text)) {
+      errors.push({
+        original: 'despite of',
+        corrected: 'despite',
+        explanation: `"Despite" doesn't need "of". Use "despite" alone, or "in spite of" with "of".`,
+        category: 'Prepositions',
+        severity: 'grammar'
+      });
+    }
+    return errors;
+  }
+
+  // 规则16: 首字母大写
+  checkCapitalization(text) {
+    const errors = [];
+    const trimmed = text.trimStart();
+    if (trimmed.length > 0 && /^[a-z]/.test(trimmed)) {
+      errors.push({
+        original: trimmed.charAt(0),
+        corrected: trimmed.charAt(0).toUpperCase(),
+        explanation: 'Sentences should start with a capital letter.',
+        category: 'Capitalization',
+        severity: 'style'
+      });
+    }
+    // 检查 i 作为独立词 (应该是 I)
+    const iPattern = /(?:^|\s)(i)(?:\s|$|[,.;:!?])/gm;
+    let match;
+    while ((match = iPattern.exec(text)) !== null) {
+      // 排除 "I'm", "I've", "I'll", "I'd" 这些已经大写的
+      errors.push({
+        original: 'i',
+        corrected: 'I',
+        explanation: 'The pronoun "I" should always be capitalized.',
+        category: 'Capitalization',
+        severity: 'style'
+      });
+    }
+    return errors;
+  }
+
+  // 规则17: much + 可数名词
+  checkMuchCountable(text) {
+    const errors = [];
+    const countableNouns = ['people','books','students','friends','cars','houses','rooms','days','years','hours','minutes','months','weeks','children','men','women','dogs','cats','birds','trees','flowers','chairs','tables','doors','windows','shops','schools','hospitals','hotels','restaurants','countries','cities','villages','roads','streets','bridges','buildings','problems','mistakes','questions','answers','ideas','plans','rules','laws','stories','songs','movies','games','teams','players','teachers','doctors','workers','jobs','tasks','tests','exams','pages','words','letters','numbers','prices','names','places','examples','cases','points','reasons','results','effects','changes','differences','similarities','advantages','disadvantages','options','choices','decisions','steps','methods','ways','types','kinds','parts','pieces','things','animals'];
+    const pattern = /\bmuch\s+(\w+)\b/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const noun = match[1].toLowerCase().replace(/[^a-z]/g, '');
+      if (countableNouns.includes(noun)) {
+        errors.push({
+          original: `much ${noun}`,
+          corrected: `many ${noun}`,
+          explanation: `"${noun}" is countable. Use "many" with countable nouns and "much" with uncountable nouns.`,
+          category: 'Quantifiers',
+          severity: 'grammar'
+        });
+      }
+    }
+    return errors;
+  }
+
+  // 规则18: will + 过去式
+  checkWillPastTense(text) {
+    const errors = [];
+    const pattern = /\bwill\s+(\w+)\b/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const verb = match[1].toLowerCase().replace(/[^a-z]/g, '');
+      if (PAST_TO_BASE[verb]) {
+        errors.push({
+          original: `will ${match[1]}`,
+          corrected: `will ${PAST_TO_BASE[verb]}`,
+          explanation: `After "will", use the base form "${PAST_TO_BASE[verb]}", not the past tense "${verb}".`,
+          category: 'Tense',
+          severity: 'grammar'
+        });
+      } else if (verb.endsWith('ed') && verb.length > 3) {
+        const base = verb.replace(/ed$/, '');
+        if (BASE_VERBS.has(base)) {
+          errors.push({
+            original: `will ${match[1]}`,
+            corrected: `will ${base}`,
+            explanation: `After "will", use the base form of the verb.`,
+            category: 'Tense',
+            severity: 'grammar'
+          });
+        }
+      }
+    }
+    return errors;
+  }
+}
+
+
+/* =============================================================
+   CONVERSATION ENGINE
+   ============================================================= */
+
+class ConversationEngine {
+  constructor() {
+    this.grammarChecker = new GrammarChecker();
+    this.history = [];
+    this.topicHistory = {};
+    this.usedFollowUps = {};
+    this.stats = {
+      messages: 0,
+      correct: 0,
+      errorCount: 0,
+      streak: 0,
+      bestStreak: 0,
+      errorTypes: {},
+      startTime: Date.now()
+    };
+  }
+
+  detectTopic(text) {
+    const lower = text.toLowerCase();
+    let bestTopic = null;
+    let bestScore = 0;
+
+    for (const [topic, data] of Object.entries(TOPICS)) {
+      let score = 0;
+      for (const kw of data.keywords) {
+        if (lower.includes(kw)) score++;
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        bestTopic = topic;
+      }
+    }
+    return bestScore >= 1 ? bestTopic : null;
+  }
+
+  analyzeSentiment(text) {
+    const words = text.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/);
+    let pos = 0, neg = 0;
+    for (const w of words) {
+      if (POSITIVE_WORDS.has(w)) pos++;
+      if (NEGATIVE_WORDS.has(w)) neg++;
+    }
+    if (pos > neg) return 'positive';
+    if (neg > pos) return 'negative';
+    return 'neutral';
+  }
+
+  suggestVocabUpgrade(text) {
+    const lower = text.toLowerCase();
+    const suggestions = [];
+
+    for (const [phrase, upgrades] of Object.entries(VOCAB_UPGRADES)) {
+      if (lower.includes(phrase)) {
+        const upgrade = upgrades[Math.floor(Math.random() * upgrades.length)];
+        suggestions.push({ phrase, upgrade });
+      }
+    }
+    return suggestions;
+  }
+
+  scoreSentence(text, errors) {
+    if (errors.length === 0) return 100;
+    let score = 100;
+    for (const e of errors) {
+      if (e.severity === 'grammar') score -= 15;
+      else score -= 5;
+    }
+    return Math.max(0, score);
+  }
+
+  getFollowUp(topic, sentiment) {
+    if (topic && TOPICS[topic]) {
+      if (!this.usedFollowUps[topic]) this.usedFollowUps[topic] = new Set();
+      const available = TOPICS[topic].followUps.filter((_, i) => !this.usedFollowUps[topic].has(i));
+      if (available.length > 0) {
+        const idx = TOPICS[topic].followUps.indexOf(available[Math.floor(Math.random() * available.length)]);
+        this.usedFollowUps[topic].add(idx);
+        return available[Math.floor(Math.random() * available.length)];
+      }
+      // 用完了就重置
+      this.usedFollowUps[topic] = new Set();
+      return TOPICS[topic].followUps[Math.floor(Math.random() * TOPICS[topic].followUps.length)];
+    }
+
+    // 无主题时的通用追问
+    const genericFollowUps = [
+      "Can you tell me more about that?",
+      "What made you think of that?",
+      "How did that make you feel?",
+      "Can you give me an example?",
+      "What happened next?",
+      "Why do you think that is?",
+      "How would you explain that to someone?",
+      "What's your opinion on that?",
+      "Can you describe it in more detail?",
+      "What would you do differently?",
+    ];
+    return genericFollowUps[Math.floor(Math.random() * genericFollowUps.length)];
+  }
+
+  handleSpecialInput(text) {
+    const lower = text.toLowerCase().trim();
+
+    // 打招呼
+    if (/^(hi|hello|hey|howdy|greetings|good\s*(morning|afternoon|evening))[\s!.?]*$/i.test(lower)) {
+      const greetings = [
+        "Hello! Welcome to your English practice session. Write any sentence and I'll help you improve it.",
+        "Hi there! Ready to practice English? Try writing a sentence about your day.",
+        "Hey! Great to see you. Let's work on your English — type anything you'd like to say.",
+      ];
+      return { type: 'greeting', text: greetings[Math.floor(Math.random() * greetings.length)] };
+    }
+
+    // "how are you" 类型
+    if (/how\s+are\s+you|how('s| is) it going|what('s| is) up|how\s+do\s+you\s+do/i.test(lower)) {
+      return {
+        type: 'greeting',
+        text: "I'm doing great, thanks for asking! But I'm here to help YOU practice. Tell me — what did you do today? Try writing it in English."
+      };
+    }
+
+    // 询问如何使用
+    if (/how\s+(do|can|should)\s+i\s+(use|start|begin|practice)|what\s+(can|should)\s+i\s+(do|say|write)|help\s+me|i\s+don('t| not)\s+know\s+what\s+to/i.test(lower)) {
+      return {
+        type: 'help',
+        text: "Here's how to use this trainer:\n\n1. Write any English sentence\n2. I'll check it for grammar errors\n3. I'll suggest better vocabulary\n4. I'll keep the conversation going\n\nTry starting with something simple, like: \"Yesterday I went to the park with my friend.\""
+      };
+    }
+
+    // 太短
+    if (lower.split(/\s+/).length < 3) {
+      return {
+        type: 'too_short',
+        text: "That's a bit too short for me to give good feedback. Try writing a full sentence with at least 5-6 words."
+      };
+    }
+
+    return null;
+  }
+
+  generateResponse(userText) {
+    const special = this.handleSpecialInput(userText);
+    if (special) return { text: special.text, score: null, errors: [] };
+
+    const errors = this.grammarChecker.check(userText);
+    const topic = this.detectTopic(userText);
+    const sentiment = this.analyzeSentiment(userText);
+    const vocabSuggestions = this.suggestVocabUpgrade(userText);
+    const score = this.scoreSentence(userText, errors);
+
+    // 更新统计
+    this.stats.messages++;
+    if (errors.length === 0) {
+      this.stats.correct++;
+      this.stats.streak++;
+      this.stats.bestStreak = Math.max(this.stats.bestStreak, this.stats.streak);
+    } else {
+      this.stats.errorCount += errors.length;
+      this.stats.streak = 0;
+      for (const e of errors) {
+        this.stats.errorTypes[e.category] = (this.stats.errorTypes[e.category] || 0) + 1;
+      }
+    }
+
+    if (topic) {
+      this.topicHistory[topic] = (this.topicHistory[topic] || 0) + 1;
+    }
+
+    this.history.push({ user: userText, errors, score, topic, sentiment });
+
+    // 构建回复
+    let parts = [];
+
+    if (errors.length > 0) {
+      // 语法错误
+      parts.push({ type: 'header', text: `I found ${errors.length} issue${errors.length > 1 ? 's' : ''}:` });
+
+      for (const e of errors.slice(0, 4)) {
+        parts.push({
+          type: 'correction',
+          subtype: 'err',
+          text: `${e.original} → ${e.corrected}\n${e.explanation}`
+        });
+      }
+
+      if (errors.length > 4) {
+        parts.push({ type: 'note', text: `...and ${errors.length - 4} more. Let's focus on these first.` });
+      }
+
+      // 鼓励
+      const encouragements = [
+        "Don't worry — these are common mistakes. You're learning!",
+        "Keep going! Mistakes are proof that you're trying.",
+        "This is totally normal at this stage. Practice makes perfect.",
+        "You're identifying the tricky parts — that's progress!",
+      ];
+      parts.push({
+        type: 'correction',
+        subtype: 'tip',
+        text: encouragements[Math.floor(Math.random() * encouragements.length)]
+      });
+
+    } else {
+      // 没有错误
+      const praises = [
+        "Perfect grammar! Not a single mistake.",
+        "Excellent! Your sentence is grammatically correct.",
+        "Well done! That's a clean, correct sentence.",
+        "No errors at all! Your English is looking strong.",
+        "Spot on! Great sentence structure and grammar.",
+      ];
+      parts.push({
+        type: 'correction',
+        subtype: 'good',
+        text: praises[Math.floor(Math.random() * praises.length)]
+      });
+
+      // 词汇升级建议
+      if (vocabSuggestions.length > 0 && score >= 80) {
+        const vs = vocabSuggestions[0];
+        parts.push({
+          type: 'correction',
+          subtype: 'tip',
+          text: `Vocabulary upgrade: instead of "${vs.phrase}", try "${vs.upgrade}" — it sounds more natural and expressive.`
+        });
+      }
+    }
+
+    // 追问
+    const followUp = this.getFollowUp(topic, sentiment);
+    parts.push({ type: 'followup', text: followUp });
+
+    return { parts, score, errors, topic };
+  }
+
+  getStats() {
+    const accuracy = this.stats.messages > 0
+      ? Math.round((this.stats.correct / this.stats.messages) * 100)
+      : null;
+
+    let level = 'Beginner';
+    let levelPct = 0;
+    if (accuracy !== null) {
+      if (accuracy >= 95) { level = 'Expert'; levelPct = 100; }
+      else if (accuracy >= 85) { level = 'Advanced'; levelPct = 75 + (accuracy - 85) * 2.5; }
+      else if (accuracy >= 65) { level = 'Intermediate'; levelPct = 40 + (accuracy - 65) * 1.75; }
+      else if (accuracy >= 40) { level = 'Elementary'; levelPct = 10 + (accuracy - 40) * 1.2; }
+      else { level = 'Beginner'; levelPct = accuracy * 0.25; }
+    }
+
+    const elapsed = Math.floor((Date.now() - this.stats.startTime) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+
+    return {
+      messages: this.stats.messages,
+      accuracy,
+      streak: this.stats.streak,
+      bestStreak: this.stats.bestStreak,
+      time: `${mins}:${secs.toString().padStart(2, '0')}`,
+      level,
+      levelPct: Math.min(100, Math.round(levelPct)),
+      errorTypes: { ...this.stats.errorTypes }
+    };
+  }
+}
+
+
+/* =============================================================
+   UI CONTROLLER
+   ============================================================= */
+
+const engine = new ConversationEngine();
+let isProcessing = false;
+
+function addMessage(content, type, score) {
+  // 移除欢迎消息
+  const welcome = document.querySelector('.welcome');
+  if (welcome) welcome.remove();
+
+  const chat = document.getElementById('chat');
+
+  const wrap = document.createElement('div');
+  wrap.className = `msg-wrap ${type}`;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar';
+  avatar.innerHTML = type === 'user'
+    ? '<i class="fas fa-user"></i>'
+    : '<i class="fas fa-brain"></i>';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+
+  if (typeof content === 'string') {
+    bubble.innerText = content;
+  } else if (Array.isArray(content)) {
+    // 结构化内容 (parts)
+    for (const part of content) {
+      if (part.type === 'header') {
+        const h = document.createElement('div');
+        h.style.cssText = 'font-weight:600;margin-bottom:8px;font-size:14px;';
+        h.textContent = part.text;
+        bubble.appendChild(h);
+      } else if (part.type === 'correction') {
+        const div = document.createElement('div');
+        div.className = `correction ${part.subtype}`;
+
+        if (part.subtype === 'err') {
+          // 解析 "original → corrected" 格式
+          const lines = part.text.split('\n');
+          const arrow = document.createElement('div');
+          const parts2 = lines[0].split(' → ');
+          if (parts2.length === 2) {
+            arrow.innerHTML = `<span class="strike">${escapeHtml(parts2[0])}</span> → <span class="fix">${escapeHtml(parts2[1])}</span>`;
+          } else {
+            arrow.textContent = lines[0];
+          }
+          div.appendChild(arrow);
+          if (lines[1]) {
+            const exp = document.createElement('div');
+            exp.style.cssText = 'margin-top:3px;opacity:0.85;font-size:12px;';
+            exp.textContent = lines[1];
+            div.appendChild(exp);
+          }
+        } else {
+          div.textContent = part.text;
+        }
+
+        bubble.appendChild(div);
+      } else if (part.type === 'note') {
+        const div = document.createElement('div');
+        div.style.cssText = 'font-size:12px;color:var(--muted);margin:4px 0;';
+        div.textContent = part.text;
+        bubble.appendChild(div);
+      } else if (part.type === 'followup') {
+        const div = document.createElement('div');
+        div.style.cssText = 'margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:14px;color:var(--fg);';
+        div.textContent = part.text;
+        bubble.appendChild(div);
+      }
+    }
+  }
+
+  // 分数标签
+  if (score !== null && score !== undefined && type === 'ai') {
+    const badge = document.createElement('div');
+    let scoreClass = 'low';
+    let label = 'Needs Work';
+    if (score >= 80) { scoreClass = 'high'; label = 'Excellent'; }
+    else if (score >= 50) { scoreClass = 'mid'; label = 'Getting There'; }
+    badge.className = `msg-score ${scoreClass}`;
+    badge.innerHTML = `<i class="fas fa-${score >= 80 ? 'check-circle' : score >= 50 ? 'minus-circle' : 'times-circle'}"></i> ${score}/100 ${label}`;
+    bubble.appendChild(badge);
+  }
+
+  wrap.appendChild(avatar);
+  wrap.appendChild(bubble);
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function showTyping() {
+  document.getElementById('typingIndicator').classList.add('show');
+  const chat = document.getElementById('chat');
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function hideTyping() {
+  document.getElementById('typingIndicator').classList.remove('show');
+}
+
+function updateSidebar() {
+  const stats = engine.getStats();
+
+  document.getElementById('statMsgs').textContent = stats.messages;
+  document.getElementById('statAccuracy').textContent = stats.accuracy !== null ? stats.accuracy + '%' : '--';
+  document.getElementById('statStreak').textContent = stats.streak;
+  document.getElementById('statTime').textContent = stats.time;
+  document.getElementById('levelBadge').textContent = stats.level;
+  document.getElementById('levelPct').textContent = stats.levelPct + '%';
+  document.getElementById('levelFill').style.width = stats.levelPct + '%';
+
+  // 错误标签
+  const tagsEl = document.getElementById('errorTags');
+  const entries = Object.entries(stats.errorTypes).sort((a, b) => b[1] - a[1]);
+  if (entries.length === 0) {
+    tagsEl.innerHTML = stats.messages > 0
+      ? '<span style="font-size:12px;color:var(--success);"><i class="fas fa-check-circle"></i> No mistakes yet!</span>'
+      : '<span style="font-size:12px;color:var(--muted);">Start typing to see patterns...</span>';
+  } else {
+    tagsEl.innerHTML = entries.slice(0, 6).map(([cat, count]) =>
+      `<span class="error-tag">${cat} <span class="count">${count}</span></span>`
+    ).join('');
+  }
+}
+
+function getTypingDelay(text) {
+  const len = typeof text === 'string' ? text.length : 200;
+  return Math.min(len * 4 + 400, 2200) + Math.random() * 400;
 }
 
 function send() {
-  let input = document.getElementById("msg");
-  let text = input.value.trim();
+  if (isProcessing) return;
+
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
   if (!text) return;
 
-  addMessage(text, "user");
+  isProcessing = true;
+  document.getElementById('sendBtn').disabled = true;
+  input.value = '';
+  autoResize(input);
 
-  let reply = generateReply(text.toLowerCase());
+  addMessage(text, 'user');
 
-  // small typing delay (feels like AI)
+  showTyping();
+
+  const result = engine.generateResponse(text);
+  const delay = getTypingDelay(
+    Array.isArray(result.parts) ? result.parts.map(p => p.text).join('') : result.text
+  );
+
   setTimeout(() => {
-    addMessage(reply, "ai");
-  }, 500);
+    hideTyping();
 
-  input.value = "";
+    if (result.parts) {
+      addMessage(result.parts, 'ai', result.score);
+    } else {
+      addMessage(result.text, 'ai', result.score);
+    }
+
+    updateSidebar();
+    updateSuggestions(result.topic);
+
+    isProcessing = false;
+    document.getElementById('sendBtn').disabled = false;
+    input.focus();
+  }, delay);
 }
 
-/* 🧠 YOUR LOCAL AI BRAIN */
-function generateReply(text) {
+function updateSuggestions(currentTopic) {
+  const container = document.getElementById('suggestions');
+  const chips = [];
 
-  // grammar fixes
-  if (text.includes("i go to school yesterday")) {
-    return "❌ Correct: I went to school yesterday.\n💡 'Go' past tense = went.";
+  if (currentTopic && TOPICS[currentTopic]) {
+    // 基于当前主题的启发式建议
+    const topicData = TOPICS[currentTopic];
+    const kw = topicData.keywords;
+    chips.push(`I really enjoy ${kw[Math.floor(Math.random() * Math.min(5, kw.length))]}`);
+    chips.push(`What do you think about ${kw[Math.floor(Math.random() * Math.min(5, kw.length))]}?`);
+    if (currentTopic === 'work') chips.push('My boss give me a lot of works');
+    if (currentTopic === 'food') chips.push('The food was more better than expected');
+    if (currentTopic === 'travel') chips.push('I have went to many countries');
+    if (currentTopic === 'family') chips.push('Me and my brother is very close');
+    if (currentTopic === 'education') chips.push('I didn\'t went to school yesterday');
+  } else {
+    chips.push('She don\'t know what happened');
+    chips.push('I have ate too much food');
+    chips.push('He can able to speak three languages');
+    chips.push('The informations was very useful');
+    chips.push('I am agree with your opinion');
   }
 
-  if (text.includes("i am agree")) {
-    return "❌ Correct: I agree.\n💡 We don't use 'am' with agree.";
+  // 确保有足够的错误示例来练习
+  const errorExamples = [
+    'Yesterday I go to shopping',
+    'He didn\'t came to the meeting',
+    'I am enjoy reading books very much',
+    'She is more smarter than her sister',
+    'We didn\'t had enough time',
+  ];
+  if (chips.length < 4) {
+    chips.push(...errorExamples.slice(0, 4 - chips.length));
   }
 
-  if (text.includes("hello")) {
-    return "Hello 😏 Let's practice English. Try making a sentence.";
-  }
-
-  if (text.includes("how are you")) {
-    return "I'm fine 😄 Now tell me something about your day.";
-  }
-
-  // default AI-style response
-  return "Hmm interesting 😏\nTry rewriting this in better English or add more detail.";
+  container.innerHTML = chips.slice(0, 4).map(c =>
+    `<button class="sug-chip" onclick="useSuggestion(this)">${escapeHtml(c)}</button>`
+  ).join('');
 }
+
+function useSuggestion(el) {
+  const input = document.getElementById('msgInput');
+  input.value = el.textContent;
+  autoResize(input);
+  send();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+}
+
+function resetSession() {
+  if (isProcessing) return;
+  const chat = document.getElementById('chat');
+  chat.innerHTML = `
+    <div class="welcome">
+      <div class="welcome-icon"><i class="fas fa-comments"></i></div>
+      <h2>Start Practicing English</h2>
+      <p>Write any sentence and I'll check your grammar, suggest better vocabulary, and keep the conversation going.</p>
+    </div>
+  `;
+  // 重置引擎
+  engine.stats = {
+    messages: 0, correct: 0, errorCount: 0,
+    streak: 0, bestStreak: 0, errorTypes: {},
+    startTime: Date.now()
+  };
+  engine.history = [];
+  engine.topicHistory = {};
+  engine.usedFollowUps = {};
+  updateSidebar();
+  document.getElementById('suggestions').innerHTML = [
+    'Yesterday I go to the market',
+    'She don\'t like coffee',
+    'I am agree with you',
+    'Me and my friend went to park',
+    'I have ate breakfast already'
+  ].map(c => `<button class="sug-chip" onclick="useSuggestion(this)">${c}</button>`).join('');
+  toggleSidebar();
+}
+
+// 计时器更新
+setInterval(() => {
+  const timeEl = document.getElementById('statTime');
+  if (timeEl) {
+    const stats = engine.getStats();
+    timeEl.textContent = stats.time;
+  }
+}, 1000);
+
+// 初始化
+updateSidebar();
+document.getElementById('msgInput').focus();
 </script>
-
 </body>
 </html>
