@@ -5,11 +5,11 @@ export default async function handler(req, res) {
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
-      "Authorization": "Bearer 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",
+      "Authorization": "Bearer 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",
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "openchat/openchat-7b:free",
+      model: "poolside/laguna-xs.2:free",
       messages: [
         {
           role: "system",
