@@ -1,12 +1,4 @@
-
 export default async function handler(req, res) {
-
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST");
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
 
   const userMsg = req.body.message;
 
@@ -17,17 +9,27 @@ export default async function handler(req, res) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "mistralai/mistral-7b-instruct",
+      model: "openchat/openchat-7b:free",
       messages: [
-        { role: "system", content: "You are an English trainer. Correct grammar and ask questions." },
-        { role: "user", content: userMsg }
+        {
+          role: "system",
+          content: "You are an English teacher. Correct grammar and explain mistakes."
+        },
+        {
+          role: "user",
+          content: userMsg
+        }
       ]
     })
   });
 
   const data = await response.json();
 
-  res.status(200).json({
-    reply: data.choices?.[0]?.message?.content || "No response"
+  // 👇 THIS IS KEY (debugging)
+  console.log("OPENROUTER RESPONSE:", data);
+
+  return res.status(200).json({
+    debug: data,
+    reply: data?.choices?.[0]?.message?.content || "No response from AI"
   });
 }
